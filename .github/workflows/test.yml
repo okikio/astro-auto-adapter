@@ -13,7 +13,6 @@ on:
       - '*.yaml'
       - '.github/../test.yml'
       - 'src/**/*'
-      - 'tests/**/*'
 
 jobs:
   build:
@@ -57,4 +56,4 @@ jobs:
         run: pnpm install
 
       - name: Run Test
-        run: pnpm test:run
+        run: pnpm test

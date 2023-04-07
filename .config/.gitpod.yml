@@ -22,7 +22,7 @@ github:
 # add a "Review in Gitpod" button as a comment to pull requests (defaults to true)
     addComment: true
 # add a "Review in Gitpod" button to pull requests (defaults to false)
-    addBadge: false
+    addBadge: true
 # add a label once the prebuild is ready to pull requests (defaults to false)
     addLabel: prebuilt-in-gitpod
 
@@ -31,16 +31,13 @@ tasks:
   - init: >
       nvm install &&
       npm install -g pnpm &&
-      pnpm install &&
-      pnpm playwright:init
+      pnpm install
     command: >
       nvm install &&
       npm install -g pnpm &&
-      pnpm install &&
-      pnpm playwright:init &&
-      pnpm build 
+      pnpm install
 vscode:
   extensions:
     - denoland.vscode-deno
-    - ZixuanChen.vitest-explorer
-    - github.github-vscode-theme
+    - astro-build.astro-vscode
+    - stateful.runme

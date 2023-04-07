@@ -56,7 +56,6 @@ jobs:
       - name: Add lib, types and docs to Git
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
-          git add --force @types/
           git add --force lib/
 
       - name: Commit files

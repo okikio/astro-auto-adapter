@@ -1,14 +1,14 @@
 {
-  "name": "transferables",
-  "version": "1.0.1",
+  "name": "astro-auto-adapter",
+  "version": "0.0.0",
   "type": "module",
   "sideEffects": false,
-  "description": "Utility library that lists out all transferable objects that can be transfered between Workers and the main thread.",
-  "umd": "Transferables",
+  "umd": "astroAutoAdapter",
+  "description": "Let's you choose between Astro Adapters based off of the `ASTRO_ADAPTER_MODE` environment variable.",
   "access": "public",
   "legacy": "lib/index.js",
   "main": "lib/index.cjs",
-  "types": "@types/index.d.ts",
+  "types": "lib/index.d.ts",
   "browser": "lib/index.mjs",
   "module": "lib/index.mjs",
   "exports": {
@@ -22,51 +22,24 @@
   },
   "directories": {
     "lib": "./lib",
-    "src": "./src",
-    "@types": "./@types"
+    "src": "./src"
   },
   "files": [
     "lib",
-    "src",
-    "@types"
+    "src"
   ],
   "scripts": {
-    "start": "pnpm browser:fixture",
-    "dev": "pnpm browser:fixture",
-    "test": "vitest",
-    "test:run": "vitest run tests",
-    "build": "vite build",
-    "playwright:init": "playwright install --with-deps",
-    "browser:fixture": "vite build ./benchmark/fixtures --target \"es2022\" && vite preview ./benchmark/fixtures --port 3000",
-    "browser:fixture:dev": "vite dev ./benchmark/fixtures --port 3000",
-    "benchmark:browser": "playwright test ./benchmark/browsers.spec.ts",
-    "benchmark:browser:chrome": "rm -rf ./benchmark/results/chromium.md && playwright test --browser=chromium ./benchmark/browsers.spec.ts",
-    "benchmark:browser:firefox": "rm -rf ./benchmark/results/firefox.md && playwright test --browser=firefox ./benchmark/browsers.spec.ts",
-    "benchmark:browser:safari": "rm -rf ./benchmark/results/safari.md && playwright test --browser=webkit ./benchmark/browsers.spec.ts",
-    "benchmark:node": "vitest run ./benchmark/node.test.ts",
-    "benchmark:node:messagechannel": "vitest run ./benchmark/node.messagechannel.test.ts",
-    "benchmark:node:all": "rm -rf ./benchmark/results/node.md && pnpm benchmark:node && pnpm benchmark:node:messagechannel",
-    "benchmark:deno": "deno run --allow-run --allow-env --allow-read --allow-hrtime --allow-write --allow-sys ./benchmark/deno.ts",
-    "benchmark:deno:worker": "deno run --allow-run --allow-env --allow-read --allow-hrtime --allow-write --allow-sys ./benchmark/deno.worker.ts",
-    "benchmark:deno:messagechannel": "deno run --allow-run --allow-env --allow-read --allow-hrtime --allow-write --allow-sys ./benchmark/deno.messagechannel.ts",
-    "benchmark:deno:all": "rm -rf ./benchmark/results/deno.md && pnpm benchmark:deno && pnpm benchmark:deno:messagechannel && pnpm benchmark:deno:worker",
-    "benchmark:bun": "bun run vitest run --passWithNoTests ./benchmark/bun.test.ts",
-    "benchmark:bun:messagechannel": "bun run vitest run --passWithNoTests ./benchmark/bun.messagechannel.test.ts",
-    "benchmark:bun:all": "rm -rf ./benchmark/results/bun.md && pnpm benchmark:bun && pnpm benchmark:bun:messagechannel",
-    "benchmark": "pnpm benchmark:node:all && pnpm benchmark:deno:all && pnpm benchmark:bun:all",
-    "benchmark:all": "pnpm benchmark && pnpm benchmark:browser",
-    "pre-release": "pnpm test:run && pnpm build",
+    "astro": "astro",
+    "dev": "astro dev",
+    "start": "astro dev",
+    "preview": "astro preview",
+    "build": "vite build --config vite-config.ts",
+    "test": "astro build",
+    "pre-release": "pnpm test && pnpm build",
     "semantic-release": "semantic-release"
   },
   "engines": {
     "node": ">=18"
-  },
-  "ultra": {
-    "concurrent": [
-      "pre-release",
-      "benchmark",
-      "benchmark:all"
-    ]
   },
   "release": {
     "branches": [
@@ -89,7 +62,7 @@
     ]
   },
   "changelog": {
-    "repo": "transferables",
+    "repo": "astro-auto-adapter",
     "labels": {
       "breaking": ":boom: Breaking Change",
       "enhancement": ":rocket: Enhancement",
@@ -107,31 +80,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/okikio/transferables.git"
+    "url": "https://github.com/okikio/astro-auto-adapter.git"
   },
   "keywords": [
-    "transferable-objects",
-    "transferable",
-    "typescript",
-    "webworker",
-    "worker",
-    "structuredClone",
-    "uint8array",
-    "int8array",
-    "uint8clampedarray",
-    "int16array",
-    "uint16array",
-    "int32array",
-    "uint32array",
-    "float32array",
-    "float64array",
-    "arraybuffer",
-    "messageport",
-    "messagechannel",
-    "readablestream",
-    "writablestream",
-    "transformstream",
-    "streams"
+    "astro-utility",
+    "withastro",
+    "cloudflare",
+    "node",
+    "deno",
+    "vercel",
+    "edge",
+    "astro-adapter",
+    "astro-integration",
+    "serverless",
+    "astro"
   ],
   "author": {
     "name": "Okiki Ojo",
@@ -140,31 +102,34 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/okikio/transferables/issues"
+    "url": "https://github.com/okikio/astro-auto-adapter/issues"
   },
-  "homepage": "https://github.com/okikio/transferables",
+  "homepage": "https://github.com/okikio/astro-auto-adapter",
   "devDependencies": {
-    "@commitlint/cli": "^17.4.3",
-    "@commitlint/config-conventional": "^17.4.3",
-    "@playwright/test": "^1.30.0",
-    "@semantic-release/changelog": "^6.0.2",
+    "@astrojs/cloudflare": "^6.2.2",
+    "@astrojs/deno": "^4.1.0",
+    "@astrojs/netlify": "^2.2.0",
+    "@astrojs/node": "^5.1.1",
+    "@astrojs/vercel": "^3.2.2",
+    "@commitlint/cli": "^17.5.1",
+    "@commitlint/config-conventional": "^17.4.4",
+    "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
-    "@types/node": "^18.13.0",
-    "@types/offscreencanvas": "^2019.7.0",
-    "@types/web": "^0.0.91",
-    "comlink": "^4.4.1",
-    "happy-dom": "^8.4.2",
+    "@types/node": "^18.15.11",
+    "astro": "^2.2.0",
     "husky": "^8.0.3",
-    "markdown-table": "^3.0.3",
-    "micromark": "^3.1.0",
-    "micromark-extension-gfm": "^2.0.1",
-    "pnpm": "^7.27.0",
-    "pretty-bytes": "^6.1.0",
-    "semantic-release": "^20.1.0",
-    "typescript": "^4.9.5",
-    "ultra-runner": "^3.10.5",
-    "vite": "^4.1.1",
-    "vite-plugin-dts": "^1.7.3",
-    "vitest": "^0.28.5"
+    "pnpm": "^8.1.1",
+    "semantic-release": "^21.0.1",
+    "typescript": "^5.0.3",
+    "vite": "^4.2.1",
+    "vite-plugin-dts": "^2.2.0"
+  },
+  "peerDependencies": {
+    "@astrojs/cloudflare": "^6.2.2",
+    "@astrojs/deno": "^4.1.0",
+    "@astrojs/netlify": "^2.2.0",
+    "@astrojs/node": "^5.1.1",
+    "@astrojs/vercel": "^3.2.2",
+    "astro": "^2.2.0"
   }
 }
