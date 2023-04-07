@@ -37,7 +37,6 @@ pnpm install astro-auto-adapter
 ```
 
 </details>
-<br>
 
 
 ## Usage
@@ -246,8 +245,6 @@ A couple sites/projects that use `astro-auto-adapter`:
 <!-- - [bundlejs](https://bundlejs.com) -->
 - Your site/project here...
   
-<br>
-
 
 ## Contributing
 
