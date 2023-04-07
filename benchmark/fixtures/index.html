@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="color-scheme" content="dark light" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benchmark</title>
+</head>
+<body>
+  <button id="structuredClone" type="button">structuredClone</button>
+  <button id="postMessageMessageChannel" type="button">postMessage (MessageChannel)</button>
+  <button id="postMessageWorker" type="button">postMessage (Worker)</button>
+
+  <script type="module">
+    import { structuredCloneBtn } from "./main";
+    console.log({
+      structuredCloneBtn: structuredCloneBtn.id
+    })
+  </script>
+</body>
+</html>
