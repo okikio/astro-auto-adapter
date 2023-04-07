@@ -50,7 +50,7 @@ export const AUTO_ASTRO_ADAPTER_ENV_VAR = "ASTRO_ADAPTER_MODE";
  * 
  * @param type which adapter to use
  * @param opts setting the correct adapter options, e.g. on Netlify which `dist` folder shoukld be used, etc...
- * @returns Astro adapter
+ * @returns Astro Integration
  */
 export function adapter(type: keyof IAdapterOptions | ("string" & {}) = process.env[AUTO_ASTRO_ADAPTER_ENV_VAR] ?? "node", opts: IAdapterOptions = {}): AstroIntegration {
   switch (type) {
