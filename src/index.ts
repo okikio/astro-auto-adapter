@@ -5,12 +5,12 @@ import type { AstroIntegration } from "astro";
 
 export type { VercelAdapterOptions, VercelEdgeAdapterOptions, NodeAdapterOptions };
 
-import { netlifyEdgeFunctions, netlifyFunctions } from "@astrojs/netlify";
-import vercel from "@astrojs/vercel/serverless";
-import vercelEdge from "@astrojs/vercel/edge";
-import cloudflare from "@astrojs/cloudflare";
-import deno from "@astrojs/deno";
-import node from "@astrojs/node";
+const netlify = await import("@astrojs/netlify").then((m) => m.default).catch(() => null);
+const vercel = await import("@astrojs/vercel/serverless").then((m) => m.default).catch(() => null);
+const vercelEdge = await import("@astrojs/vercel/edge").then((m) => m.default).catch(() => null);
+const cloudflare = await import("@astrojs/cloudflare").then((m) => m.default).catch(() => null);
+const deno = await import("@astrojs/deno").then((m) => m.default).catch(() => null);
+const node = await import("@astrojs/node").then((m) => m.default).catch(() => null);
 
 export type CloudflareAdapterOptions = {
   mode: 'directory' | 'advanced';
@@ -59,9 +59,9 @@ export function adapter(type: keyof IAdapterOptions | ("string" & {}) = process.
     case "deno":
       return deno(opts[type]);
     case "netlify":
-      return netlifyFunctions(opts[type]);
+      return netlify.netlifyFunctions(opts[type]);
     case "netlify-edge":
-      return netlifyEdgeFunctions(opts[type]);
+      return netlify.netlifyEdgeFunctions(opts[type]);
     case "vercel":
       return vercel(opts[type]);
     case "vercel-edge":
