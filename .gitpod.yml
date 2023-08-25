@@ -40,4 +40,3 @@ vscode:
   extensions:
     - denoland.vscode-deno
     - astro-build.astro-vscode
-    - stateful.runme
