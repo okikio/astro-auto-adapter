@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "type": "module",
   "sideEffects": false,
-  "umd": "astroAutoAdapter",
   "description": "Let's you choose between Astro Adapters based off of the `ASTRO_ADAPTER_MODE` environment variable.",
   "access": "public",
   "legacy": "lib/index.cjs",
@@ -60,7 +59,9 @@
         "@semantic-release/github",
         {
           "assets": [
-            "lib/**"
+            "lib/**",
+            "src/**",
+            "example/**"
           ]
         }
       ]
@@ -111,23 +112,22 @@
   },
   "homepage": "https://github.com/okikio/astro-auto-adapter",
   "devDependencies": {
-    "@astrojs/cloudflare": "^6.2.2",
-    "@astrojs/deno": "^4.1.0",
-    "@astrojs/netlify": "^2.2.0",
-    "@astrojs/node": "^5.1.1",
-    "@astrojs/vercel": "^3.2.2",
-    "@commitlint/cli": "^17.5.1",
-    "@commitlint/config-conventional": "^17.4.4",
+    "@astrojs/cloudflare": "^6.8.1",
+    "@astrojs/deno": "^4.3.0",
+    "@astrojs/netlify": "^2.6.0",
+    "@astrojs/node": "^5.3.6",
+    "@astrojs/vercel": "^3.8.2",
+    "@commitlint/cli": "^17.7.1",
+    "@commitlint/config-conventional": "^17.7.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
-    "@types/node": "^18.15.11",
-    "astro": "^2.2.0",
+    "@types/node": "^20.5.6",
+    "astro": "^2.10.14",
     "husky": "^8.0.3",
-    "pnpm": "^8.1.1",
-    "semantic-release": "^21.0.1",
-    "typescript": "^5.0.3",
-    "vite": "^4.2.1",
-    "vite-plugin-dts": "^2.2.0"
+    "pnpm": "^8.6.12",
+    "semantic-release": "^21.1.1",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2"
   },
   "peerDependencies": {
     "@astrojs/cloudflare": "^6.2.2",
