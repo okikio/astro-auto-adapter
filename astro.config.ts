@@ -1,9 +1,9 @@
 import { defineConfig } from 'astro/config';
-import { adapter } from "./src/index.js";
+import { adapter } from "./src/index";
 
 // https://astro.build/config
 export default defineConfig({
   output: "server",
-  adapter: adapter(),
+  adapter: await adapter(),
   srcDir: "./example"
 });
