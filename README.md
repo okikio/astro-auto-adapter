@@ -10,10 +10,27 @@ Supported Adapters:
 * [node](https://docs.astro.build/en/guides/integrations-guide/node/)
 * [deno](https://docs.astro.build/en/guides/integrations-guide/deno/)
 * [cloudflare](https://docs.astro.build/en/guides/deploy/cloudflare/)
-* [vercel (edge and serverless)](https://docs.astro.build/en/guides/deploy/vercel/)
-* [netlify (edge and functions)](https://docs.astro.build/en/guides/deploy/netlify/)
+* [vercel (static, edge and serverless)](https://docs.astro.build/en/guides/deploy/vercel/)
+* [netlify (static, edge and edge functions)](https://docs.astro.build/en/guides/deploy/netlify/)
 
-> **Note**: Some adapters require configuration, which can be provided through the options.
+
+> **What's New? 🚀**
+> 
+> `astro-auto-adapter` is now even smarter! Previously, you had to manually set the `ASTRO_ADAPTER_MODE` environment variable to choose the right Astro adapter for your project. 
+> Now, we've added some magic to automatically detect the deployment environment you're using. 
+> 
+> For example, if you're deploying on `Vercel Serverless`, the `VERCEL` environment variable is set to `1`, and we'll automatically choose the `Vercel serverless` adapter for you. Neat, right?
+> 
+> Dive into the docs to see the magic behind each adapter platform:
+> * [Vercel Serverless Docs](https://vercel.com/docs/projects/environment-variables/system-environment-variables#system-environment-variables)
+> * [Vercel Edge Function Docs](https://vercel.com/docs/functions/edge-functions/edge-runtime#check-if-you're-running-on-the-edge-runtime)
+> * [Netlify Edge Function Docs](https://docs.netlify.com/edge-functions/api/#netlify-specific-context-object)
+> * [Netlify Serverless Docs](https://docs.netlify.com/configure-builds/environment-variables/#build-metadata)
+> * [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/runtime-apis/web-standards/#navigatoruseragent)
+> * [Deno Docs](https://deno.land/api@v1.36.3?s=Deno)
+
+
+> **Heads Up**: Some adapters require additional configuration. Don't worry; we've got detailed examples below to guide you through it.
 
 <!-- > You can also read the [blog post](https://blog.okikio.dev/astro-auto-adapter), created for it's launch. -->
 
@@ -50,7 +67,7 @@ import { adapter, type IAdapterOptions } from "astro-auto-adapter";
 Next, call the `adapter()` function with the desired adapter type and options:
 
 ```ts
-const astroAdapter = adapter("netlify", {
+const astroAdapter = await adapter("netlify", {
   netlify: {
     dist: new URL("path/to/dist", import.meta.url),
   },
@@ -132,7 +149,7 @@ The package also includes a default export that can be used as a shorthand for c
 ```ts
 import adapter from "astro-auto-adapter";
 
-const astroAdapter = adapter("netlify", {
+const astroAdapter = await adapter("netlify", {
   netlify: {
     dist: new URL("path/to/dist", import.meta.url),
   },
@@ -153,7 +170,7 @@ const options = {
   mode: "directory",
 };
 
-const astroAdapter = adapter("cloudflare", { cloudflare: options });
+const astroAdapter = await adapter("cloudflare", { cloudflare: options });
 ```
 
 ### Deno
@@ -167,7 +184,7 @@ const options = {
   hostname: "localhost",
 };
 
-const astroAdapter = adapter("deno", { deno: options });
+const astroAdapter = await adapter("deno", { deno: options });
 ```
 
 ### Netlify
@@ -182,7 +199,7 @@ const options = {
   binaryMediaTypes: ["application/octet-stream"],
 };
 
-const astroAdapter = adapter("netlify", { netlify: options });
+const astroAdapter = await adapter("netlify", { netlify: options });
 ```
 
 ### Netlify Edge
@@ -195,7 +212,7 @@ const options = {
   dist: new URL("path/to/dist", import.meta.url),
 };
 
-const astroAdapter = adapter("netlify-edge", { "netlify-edge": options });
+const astroAdapter = await adapter("netlify-edge", { "netlify-edge": options });
 ```
 
 ### Vercel
@@ -208,7 +225,7 @@ const options = {
   // Configuration options go here
 };
 
-const astroAdapter = adapter("vercel", { vercel: options });
+const astroAdapter = await adapter("vercel", { vercel: options });
 ```
 
 ### Vercel Edge
@@ -221,7 +238,7 @@ const options = {
   // Configuration options go here
 };
 
-const astroAdapter = adapter("vercel-edge", { "vercel-edge": options });
+const astroAdapter = await adapter("vercel-edge", { "vercel-edge": options });
 ```
 
 ### Node
@@ -234,7 +251,7 @@ const options = {
   // Configuration options go here
 };
 
-const astroAdapter = adapter("node", { node: options });
+const astroAdapter = await adapter("node", { node: options });
 ```
 
 
