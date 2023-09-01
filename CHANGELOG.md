@@ -1,3 +1,14 @@
+# [2.0.0](https://github.com/okikio/astro-auto-adapter/compare/v1.0.0...v2.0.0) (2023-09-01)
+
+
+* fix!: upgrade deps & deprecate netlify/vercel-edge ([3474669](https://github.com/okikio/astro-auto-adapter/commit/3474669535879b5bfd397e756dd659e3d394958b))
+
+
+### BREAKING CHANGES
+
+* deprecate vercel-edge & netlify-edge
+> **Note**: You need to manually set the adapter if you want static for vercel & netlify
+
 # 1.0.0 (2023-08-25)
 
 
