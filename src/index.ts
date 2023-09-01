@@ -1,29 +1,33 @@
 import type { VercelServerlessConfig as VercelAdapterOptions } from "@astrojs/vercel/serverless";
-import type { VercelEdgeConfig as VercelEdgeAdapterOptions } from "@astrojs/vercel/edge";
 import type { VercelStaticConfig as VercelStaticAdapterOptions } from "@astrojs/vercel/static";
-import type { netlifyEdgeFunctions, netlifyFunctions, netlifyStatic } from "@astrojs/netlify";
+import type { netlifyFunctions, netlifyStatic } from "@astrojs/netlify";
 import type createCloudflareWorkersIntegration from "@astrojs/cloudflare";
 import type createDenoIntegration from "@astrojs/deno";
 import type createNodeIntegration from "@astrojs/node";
 import type { AstroIntegration } from "astro";
 
 export type CloudflareAdapterOptions = Parameters<typeof createCloudflareWorkersIntegration>[0];
-export type NetlifyEdgeFunctionsAdapterOptions = Parameters<typeof netlifyEdgeFunctions>[0];
 export type NetlifyFunctionsAdapterOptions = Parameters<typeof netlifyFunctions>[0];
 export type NetlifyStaticAdapterOptions = Parameters<typeof netlifyStatic> extends never ? undefined | {} : Parameters<typeof netlifyStatic>[number];
 export type NodeAdapterOptions = Parameters<typeof createNodeIntegration>[0];
 export type DenoAdapterOptions = Parameters<typeof createDenoIntegration>[0];
-export type { VercelAdapterOptions, VercelEdgeAdapterOptions, VercelStaticAdapterOptions };
+export type { VercelAdapterOptions, VercelStaticAdapterOptions };
 
 export interface IAdapterOptions {
   cloudflare?: CloudflareAdapterOptions;
   deno?: DenoAdapterOptions;
   netlify?: NetlifyFunctionsAdapterOptions;
   "netlify-static"?: NetlifyStaticAdapterOptions;
-  "netlify-edge"?: NetlifyEdgeFunctionsAdapterOptions;
+  /**
+   * @deprecated Netlify Edge functions have been deprecated as a separate adapter https://github.com/withastro/astro/blob/main/packages/integrations/netlify/CHANGELOG.md#major-changes
+   */
+  "netlify-edge"?: never;
   vercel?: VercelAdapterOptions;
   "vercel-static"?: VercelStaticAdapterOptions;
-  "vercel-edge"?: VercelEdgeAdapterOptions;
+  /**
+   * @deprecated Vercel Edge functions have now been deprecated as a seperate adapter https://github.com/withastro/astro/blob/main/packages/integrations/vercel/CHANGELOG.md#400
+   */
+  "vercel-edge"?: never;
   node?: NodeAdapterOptions;
 }
 
@@ -56,18 +60,6 @@ export function getAutoAdapterType(): keyof IAdapterOptions {
    */
   if (getEnv("VERCEL") === "1") 
     return "vercel";
-
-  /**
-   * Vercel Edge Function Docs: https://vercel.com/docs/functions/edge-functions/edge-runtime#check-if-you're-running-on-the-edge-runtime 
-   */
-  if ("EdgeRuntime" in globalThis) 
-    return "vercel-edge";
-
-  /** 
-   * Netlify Edge Function Docs: https://docs.netlify.com/edge-functions/api/#netlify-specific-context-object
-   */
-  if ("Netlify" in globalThis) 
-    return "netlify-edge";
 
   /**
    * Netlify Docs: https://docs.netlify.com/configure-builds/environment-variables/#build-metadata
@@ -111,7 +103,8 @@ export async function adapter(
       const deno = (await import("@astrojs/deno")).default;
       return deno(opts[type]);
     }
-    case "netlify": {
+    case "netlify":
+    case "netlify-edge": {
       const netlify = await import("@astrojs/netlify");
       return netlify.netlifyFunctions(opts[type]);
     }
@@ -119,21 +112,14 @@ export async function adapter(
       const netlify = await import("@astrojs/netlify");
       return netlify.netlifyStatic();
     }
-    case "netlify-edge": {
-      const netlify = await import("@astrojs/netlify");
-      return netlify.netlifyEdgeFunctions(opts[type]);
-    }
-    case "vercel": {
+    case "vercel":
+    case "vercel-edge": {
       const vercel = (await import("@astrojs/vercel/serverless")).default;
       return vercel(opts[type]);
     }
     case "vercel-static": {
       const vercelStatic = (await import("@astrojs/vercel/static")).default;
       return vercelStatic(opts[type]);
-    }
-    case "vercel-edge": {
-      const vercelEdge = (await import("@astrojs/vercel/edge")).default;
-      return vercelEdge(opts[type]);
     }
     case "node":
     default: {
