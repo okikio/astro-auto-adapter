@@ -132,11 +132,11 @@
     "vitest": "^0.34.3"
   },
   "peerDependencies": {
-    "@astrojs/cloudflare": "^6.2.2",
-    "@astrojs/deno": "^4.1.0",
-    "@astrojs/netlify": "^2.2.0",
-    "@astrojs/node": "^5.1.1",
-    "@astrojs/vercel": "^3.2.2",
-    "astro": "^2.2.0"
+    "@astrojs/cloudflare": "^7.0.0",
+    "@astrojs/deno": "^5.0.0",
+    "@astrojs/netlify": "^3.0.0",
+    "@astrojs/node": "^6.0.0",
+    "@astrojs/vercel": "^4.0.2",
+    "astro": "^3.0.5"
   }
 }
