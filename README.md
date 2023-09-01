@@ -10,8 +10,8 @@ Supported Adapters:
 * [node](https://docs.astro.build/en/guides/integrations-guide/node/)
 * [deno](https://docs.astro.build/en/guides/integrations-guide/deno/)
 * [cloudflare](https://docs.astro.build/en/guides/deploy/cloudflare/)
-* [vercel (static, edge and serverless)](https://docs.astro.build/en/guides/deploy/vercel/)
-* [netlify (static, edge and edge functions)](https://docs.astro.build/en/guides/deploy/netlify/)
+* [vercel (static, and serverless)](https://docs.astro.build/en/guides/deploy/vercel/)
+* [netlify (static, and edge)](https://docs.astro.build/en/guides/deploy/netlify/)
 
 
 > **What's New? 🚀**
@@ -24,7 +24,6 @@ Supported Adapters:
 > Dive into the docs to see the magic behind each adapter platform:
 > * [Vercel Serverless Docs](https://vercel.com/docs/projects/environment-variables/system-environment-variables#system-environment-variables)
 > * [Vercel Edge Function Docs](https://vercel.com/docs/functions/edge-functions/edge-runtime#check-if-you're-running-on-the-edge-runtime)
-> * [Netlify Edge Function Docs](https://docs.netlify.com/edge-functions/api/#netlify-specific-context-object)
 > * [Netlify Serverless Docs](https://docs.netlify.com/configure-builds/environment-variables/#build-metadata)
 > * [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/runtime-apis/web-standards/#navigatoruseragent)
 > * [Deno Docs](https://deno.land/api@v1.36.3?s=Deno)
@@ -86,12 +85,12 @@ Configuration options for the Vercel serverless adapter.
 import type { VercelAdapterOptions } from "astro-auto-adapter";
 ```
 
-#### `VercelEdgeAdapterOptions`
+#### `VercelStaticAdapterOptions`
 
-Configuration options for the Vercel edge adapter.
+Configuration options for the Vercel static adapter.
 
 ```ts
-import type { VercelEdgeAdapterOptions } from "astro-auto-adapter";
+import type { VercelStaticAdapterOptions } from "astro-auto-adapter";
 ```
 
 #### `NodeAdapterOptions`
@@ -126,12 +125,20 @@ Configuration options for the Netlify adapter.
 import type { NetlifyAdapterOptions } from "astro-auto-adapter";
 ```
 
-#### `NetlifyEdgeAdapterOptions`
+#### `NetlifyFunctionsAdapterOptions`
 
-Configuration options for the Netlify edge adapter.
+Configuration options for the Netlify functions adapter.
 
 ```ts
-import type { NetlifyEdgeAdapterOptions } from "astro-auto-adapter";
+import type { NetlifyFunctionsAdapterOptions } from "astro-auto-adapter";
+```
+
+#### `NetlifyStaticAdapterOptions`
+
+Configuration options for the Netlify static adapter.
+
+```ts
+import type { NetlifyStaticAdapterOptions } from "astro-auto-adapter";
 ```
 
 ### Environment Variable
@@ -192,7 +199,7 @@ const astroAdapter = await adapter("deno", { deno: options });
 ```ts
 import { adapter } from "astro-auto-adapter";
 
-/** @type {import('astro-auto-adapter').NetlifyAdapterOptions} */
+/** @type {import('astro-auto-adapter').NetlifyFunctionsAdapterOptions} */
 const options = {
   dist: new URL("path/to/dist", import.meta.url),
   builders: true,
@@ -202,17 +209,17 @@ const options = {
 const astroAdapter = await adapter("netlify", { netlify: options });
 ```
 
-### Netlify Edge
+### Netlify Static
 
 ```ts
 import { adapter } from "astro-auto-adapter";
 
-/** @type {import('astro-auto-adapter').NetlifyEdgeAdapterOptions} */
+/** @type {import('astro-auto-adapter').NetlifyStaticAdapterOptions} */
 const options = {
   dist: new URL("path/to/dist", import.meta.url),
 };
 
-const astroAdapter = await adapter("netlify-edge", { "netlify-edge": options });
+const astroAdapter = await adapter("netlify-static", { "netlify-static": options });
 ```
 
 ### Vercel
@@ -228,17 +235,17 @@ const options = {
 const astroAdapter = await adapter("vercel", { vercel: options });
 ```
 
-### Vercel Edge
+### Vercel Static
 
 ```ts
 import { adapter } from "astro-auto-adapter";
 
-/** @type {import('astro-auto-adapter').VercelEdgeAdapterOptions} */
+/** @type {import('astro-auto-adapter').VercelStaticAdapterOptions} */
 const options = {
   // Configuration options go here
 };
 
-const astroAdapter = await adapter("vercel-edge", { "vercel-edge": options });
+const astroAdapter = await adapter("vercel-static", { "vercel-static": options });
 ```
 
 ### Node
