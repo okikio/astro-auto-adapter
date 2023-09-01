@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/okikio/astro-auto-adapter/compare/v2.0.0...v2.0.1) (2023-09-01)
+
+
+### Bug Fixes
+
+* update the peerDeps ([fcc3e88](https://github.com/okikio/astro-auto-adapter/commit/fcc3e88f4de55a7d132ccf071262f765d20b41e0))
+
 # [2.0.0](https://github.com/okikio/astro-auto-adapter/compare/v1.0.0...v2.0.0) (2023-09-01)
 
 
