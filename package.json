@@ -38,7 +38,7 @@
     "start": "astro dev",
     "preview": "astro preview",
     "build": "tsup",
-    "test": "astro build",
+    "test": "vitest tests/astro.test.ts",
     "pre-release": "pnpm test && pnpm build",
     "semantic-release": "semantic-release"
   },
@@ -121,13 +121,13 @@
     "@commitlint/config-conventional": "^17.7.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
-    "@types/node": "^20.5.6",
-    "astro": "^2.10.14",
+    "execa": "^8.0.1",
     "husky": "^8.0.3",
     "pnpm": "^8.6.12",
     "semantic-release": "^21.1.1",
     "tsup": "^7.2.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.3"
   },
   "peerDependencies": {
     "@astrojs/cloudflare": "^6.2.2",
