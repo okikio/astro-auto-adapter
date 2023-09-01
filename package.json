@@ -60,8 +60,7 @@
         {
           "assets": [
             "lib/**",
-            "src/**",
-            "example/**/*"
+            "src/**"
           ]
         }
       ]
