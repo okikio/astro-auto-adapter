@@ -61,7 +61,7 @@
           "assets": [
             "lib/**",
             "src/**",
-            "example/**"
+            "example/**/*"
           ]
         }
       ]
