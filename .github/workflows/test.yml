@@ -11,11 +11,13 @@ on:
       - '*.js'
       - '*.json'
       - '*.yaml'
+      - 'tests/*.ts'
+      - 'example/**/*'
       - '.github/../test.yml'
       - 'src/**/*'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
