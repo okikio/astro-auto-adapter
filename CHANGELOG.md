@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/okikio/astro-auto-adapter/compare/v2.0.1...v2.0.2) (2023-09-04)
+
+
+### Bug Fixes
+
+* deno using incorrect port ([8b4193a](https://github.com/okikio/astro-auto-adapter/commit/8b4193aaa859ae948e381c1a4e9110ab7eb8ef91))
+
 ## [2.0.1](https://github.com/okikio/astro-auto-adapter/compare/v2.0.0...v2.0.1) (2023-09-01)
 
 
