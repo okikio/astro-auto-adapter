@@ -101,7 +101,11 @@ export async function adapter(
     }
     case "deno": {
       const deno = (await import("@astrojs/deno")).default;
-      return deno(opts[type]);
+      const denoOpts = (opts[type] ?? {}) as DenoAdapterOptions;
+      return deno({
+        port: 4321,
+        ...denoOpts
+      });
     }
     case "netlify":
     case "netlify-edge": {
