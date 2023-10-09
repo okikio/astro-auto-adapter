@@ -8,9 +8,4 @@ export default defineConfig({
   clean: true,
   dts: true,
   outDir: "lib",
-  outExtension({ format }) {
-    return {
-      js: format === "esm" ? ".mjs" : format === "iife" ? ".js" : ".cjs",
-    }
-  },
 })

@@ -12,6 +12,7 @@
     "esModuleInterop": true,
     "allowArbitraryExtensions": true,
     "allowImportingTsExtensions": true,
+    "emitDeclarationOnly": true,
     "verbatimModuleSyntax": true
   },
   "include": ["src"],

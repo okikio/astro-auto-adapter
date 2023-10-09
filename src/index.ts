@@ -33,20 +33,30 @@ export interface IAdapterOptions {
 
 export const AUTO_ASTRO_ADAPTER_ENV_VAR = "ASTRO_ADAPTER_MODE";
 
+// Augmenting the globalThis interface
+interface CustomGlobalThis {
+  Deno?: Map<string, string>;
+  Netlify?: Map<string, string>;
+}
+
+// Create a type that combines globalThis with the custom properties
+type ExtendedGlobalThis = typeof globalThis & CustomGlobalThis;
+
 /**
  * Get environment variable value
  * @param name environment variable name
  */
 export function getEnv<T extends string>(name: T): string | undefined {
-  if ("Deno" in globalThis) {
-    return globalThis?.Deno?.get?.(name);
+  const extendedGlobalThis: ExtendedGlobalThis = globalThis;
+  if ("Deno" in extendedGlobalThis) {
+    return extendedGlobalThis?.Deno?.get?.(name);
   }
 
-  if ("Netlify" in globalThis) {
-    return globalThis?.Netlify?.get?.(name);
+  if ("Netlify" in extendedGlobalThis) {
+    return extendedGlobalThis?.Netlify?.get?.(name);
   }
 
-  const env = globalThis?.process?.env ?? {};
+  const env = extendedGlobalThis?.process?.env ?? {};
   return env?.[name];
 }
 
