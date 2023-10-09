@@ -1,3 +1,10 @@
+## [2.0.3](https://github.com/okikio/astro-auto-adapter/compare/v2.0.2...v2.0.3) (2023-10-09)
+
+
+### Bug Fixes
+
+* rename lib/index.mjs to lib/index.js ([e62d19a](https://github.com/okikio/astro-auto-adapter/commit/e62d19ae77aa6eb57b571d57aa074a81d70509d6))
+
 ## [2.0.2](https://github.com/okikio/astro-auto-adapter/compare/v2.0.1...v2.0.2) (2023-09-04)
 
 
