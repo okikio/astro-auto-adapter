@@ -1,3 +1,10 @@
+## [2.0.4](https://github.com/okikio/astro-auto-adapter/compare/v2.0.3...v2.0.4) (2023-10-09)
+
+
+### Bug Fixes
+
+* use Deno.env & Netlify.env for env ([34ee794](https://github.com/okikio/astro-auto-adapter/commit/34ee7940a8de66bae8a02f42fdd06293fb17cab5))
+
 ## [2.0.3](https://github.com/okikio/astro-auto-adapter/compare/v2.0.2...v2.0.3) (2023-10-09)
 
 
