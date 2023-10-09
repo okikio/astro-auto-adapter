@@ -7,8 +7,8 @@
   "access": "public",
   "legacy": "lib/index.cjs",
   "main": "lib/index.cjs",
-  "browser": "lib/index.mjs",
-  "module": "lib/index.mjs",
+  "browser": "lib/index.js",
+  "module": "lib/index.js",
   "exports": {
     ".": {
       "require": {
@@ -17,7 +17,7 @@
       },
       "import": {
         "types": "./lib/index.d.ts",
-        "default": "./lib/index.mjs"
+        "default": "./lib/index.js"
       }
     },
     "./lib/*": "./lib/*",
