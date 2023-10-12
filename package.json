@@ -32,6 +32,9 @@
     "lib",
     "src"
   ],
+  "publishConfig": {
+    "provenance": true
+  },
   "scripts": {
     "astro": "astro",
     "dev": "astro dev",
