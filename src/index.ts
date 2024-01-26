@@ -4,7 +4,7 @@ import type createNetlifyIntegration from "@astrojs/netlify";
 import type createCloudflareWorkersIntegration from "@astrojs/cloudflare";
 import type createDenoIntegration from "@astrojs/deno";
 import type createNodeIntegration from "@astrojs/node";
-import type { AstroIntegration } from "astro";
+import type { AstroIntegration, AstroConfig } from "astro";
 
 export type CloudflareAdapterOptions = Parameters<typeof createCloudflareWorkersIntegration>[0];
 export type NetlifyAdapterOptions = Parameters<typeof createNetlifyIntegration>[0];
@@ -35,6 +35,7 @@ export interface IAdapterOptions {
 }
 
 export const AUTO_ASTRO_ADAPTER_ENV_VAR = "ASTRO_ADAPTER_MODE";
+export const AUTO_ASTRO_OUTPUT_MODE_ENV_VAR = "ASTRO_OUTPUT_MODE";
 
 // Augmenting the globalThis interface
 interface CustomGlobalThis {
@@ -143,6 +144,36 @@ export async function adapter(
         mode: "standalone",
         ...nodeOpts
       });
+    }
+  }
+}
+
+/**
+ * Automatically chooses the correct astro output mode to use for the target environment
+ * > NOTE!: You may need to setup some options for some of the target environments supported
+ *
+ * @param type which adapter to use
+ * @param mode what output mode should be used; when unset uses the `ASTRO_OUPUT_MODE` env var
+ * @returns Astro output mode, "static", "server", "hybrid"
+ */
+export function output(
+  type: keyof IAdapterOptions | ("string" & {}) = getEnv(AUTO_ASTRO_ADAPTER_ENV_VAR) as keyof IAdapterOptions ?? getAutoAdapterType(),
+  mode = (getEnv(AUTO_ASTRO_OUTPUT_MODE_ENV_VAR) || "hybrid") as AstroConfig['output']
+) {
+  switch (type) {
+    case "vercel-static":
+    case "netlify-static": {
+      return "static";
+    }
+    case "node":
+    case "cloudflare":
+    case "deno":
+    case "netlify":
+    case "vercel":
+    case "netlify-edge":
+    case "vercel-edge":
+    default: {
+      return mode;
     }
   }
 }

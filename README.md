@@ -57,6 +57,8 @@ pnpm install astro-auto-adapter
 
 ## Usage
 
+### `adapter` Function
+
 First, import the necessary types and the `adapter` function from the package:
 
 ```ts
@@ -73,11 +75,11 @@ const astroAdapter = await adapter("netlify", {
 });
 ```
 
-### Adapter Options
+#### Adapter Options
 
 Here is an overview of the available adapter options:
 
-#### `VercelAdapterOptions`
+##### `VercelAdapterOptions`
 
 Configuration options for the Vercel serverless adapter.
 
@@ -85,7 +87,7 @@ Configuration options for the Vercel serverless adapter.
 import type { VercelAdapterOptions } from "astro-auto-adapter";
 ```
 
-#### `VercelStaticAdapterOptions`
+##### `VercelStaticAdapterOptions`
 
 Configuration options for the Vercel static adapter.
 
@@ -93,7 +95,7 @@ Configuration options for the Vercel static adapter.
 import type { VercelStaticAdapterOptions } from "astro-auto-adapter";
 ```
 
-#### `NodeAdapterOptions`
+##### `NodeAdapterOptions`
 
 Configuration options for the Node adapter.
 
@@ -101,7 +103,7 @@ Configuration options for the Node adapter.
 import type { NodeAdapterOptions } from "astro-auto-adapter";
 ```
 
-#### `CloudflareAdapterOptions`
+##### `CloudflareAdapterOptions`
 
 Configuration options for the Cloudflare adapter.
 
@@ -109,7 +111,7 @@ Configuration options for the Cloudflare adapter.
 import type { CloudflareAdapterOptions } from "astro-auto-adapter";
 ```
 
-#### `DenoAdapterOptions`
+##### `DenoAdapterOptions`
 
 Configuration options for the Deno adapter.
 
@@ -117,7 +119,7 @@ Configuration options for the Deno adapter.
 import type { DenoAdapterOptions } from "astro-auto-adapter";
 ```
 
-#### `NetlifyAdapterOptions`
+##### `NetlifyAdapterOptions`
 
 Configuration options for the Netlify adapter.
 
@@ -125,7 +127,7 @@ Configuration options for the Netlify adapter.
 import type { NetlifyAdapterOptions } from "astro-auto-adapter";
 ```
 
-### Environment Variable
+#### Environment Variable
 
 You can use the `ASTRO_ADAPTER_MODE` environment variable to set the adapter type instead of providing it directly to the `adapter()` function. If the environment variable is not set, the function defaults to the "node" adapter.
 
@@ -133,7 +135,7 @@ You can use the `ASTRO_ADAPTER_MODE` environment variable to set the adapter typ
 export ASTRO_ADAPTER_MODE="netlify"
 ```
 
-### Default Export
+#### Default Export
 
 The package also includes a default export that can be used as a shorthand for calling the `adapter()` function.
 
@@ -147,11 +149,11 @@ const astroAdapter = await adapter("netlify", {
 });
 ```
 
-## Examples
+### Examples
 
 Here are some examples of how to use the package with various adapter types and configurations:
 
-### Cloudflare
+#### Cloudflare
 
 ```ts
 import { adapter } from "astro-auto-adapter";
@@ -164,7 +166,7 @@ const options = {
 const astroAdapter = await adapter("cloudflare", { cloudflare: options });
 ```
 
-### Deno
+#### Deno
 
 ```ts
 import { adapter } from "astro-auto-adapter";
@@ -178,7 +180,7 @@ const options = {
 const astroAdapter = await adapter("deno", { deno: options });
 ```
 
-### Netlify
+#### Netlify
 
 ```ts
 import { adapter } from "astro-auto-adapter";
@@ -193,7 +195,7 @@ const options = {
 const astroAdapter = await adapter("netlify", { netlify: options });
 ```
 
-### Netlify Static
+#### Netlify Static
 
 ```ts
 import { adapter } from "astro-auto-adapter";
@@ -206,7 +208,7 @@ const options = {
 const astroAdapter = await adapter("netlify-static", { "netlify-static": options });
 ```
 
-### Vercel
+#### Vercel
 
 ```ts
 import { adapter } from "astro-auto-adapter";
@@ -219,7 +221,7 @@ const options = {
 const astroAdapter = await adapter("vercel", { vercel: options });
 ```
 
-### Vercel Static
+#### Vercel Static
 
 ```ts
 import { adapter } from "astro-auto-adapter";
@@ -232,7 +234,7 @@ const options = {
 const astroAdapter = await adapter("vercel-static", { "vercel-static": options });
 ```
 
-### Node
+#### Node
 
 ```ts
 import { adapter } from "astro-auto-adapter";
@@ -245,6 +247,61 @@ const options = {
 const astroAdapter = await adapter("node", { node: options });
 ```
 
+### `output` Function
+
+The `output` function in `astro-auto-adapter` is a smart utility designed to automatically select the appropriate [Astro output mode](https://docs.astro.build/en/core-concepts/rendering-modes/#server-output-modes) based on the target deployment environment. This function is especially useful when working with different hosting platforms, as it simplifies the process of configuring the correct output mode for Astro projects.
+
+#### Key Features:
+- **Automatic Mode Selection:** Chooses the correct Astro output mode (static, server, or hybrid) based on the environment.
+- **Environment Variable Support:** Uses `ASTRO_OUTPUT_MODE` to determine the preferred mode if set.
+- **Fallback to Default Mode:** If the environment variable isn't set, the function falls back to a specified default mode.
+
+#### Usage in Astro Projects:
+
+To use the `output` function, you need to import it into your Astro project and then call it with appropriate parameters. Here's a general structure of how to use it:
+
+```ts
+import { output } from 'astro-auto-adapter';
+
+// Usage
+const astroOutputMode = output('deno', 'hybrid');
+```
+
+#### Parameters:
+- `type` (optional): Type of adapter you're using (e.g., 'vercel', 'netlify'). Defaults to the value from the `ASTRO_ADAPTER_MODE` environment variable.
+- `mode` (optional): Sets Astro output mode ('static', 'server', 'hybrid'). Defaults to 'hybrid', if the `ASTRO_OUTPUT_MODE` environment variable isn't set.
+
+#### Examples:
+
+**1. Using with Vercel:**
+
+```ts
+// Automatically choose output mode for Vercel deployment, by default "hybrid"
+const outputMode = output('vercel');
+```
+
+**2. Using with Netlify:**
+
+```ts
+// Use the server output for netlify
+const outputMode = output('netlify', 'server');
+```
+
+**3. Default Usage (No Specific Adapter):**
+
+```ts
+// Use the default output mode "hybrid" or the one defined in `ASTRO_OUTPUT_MODE`
+const outputMode = output();
+```
+
+#### Supported Adapters:
+- Vercel (static and serverless)
+- Netlify (including Netlify Edge)
+- Cloudflare
+- Deno
+- Node.js
+
+> **Note**: Ensure that the necessary environment variables are set appropriately for the `output` function to work correctly.
 
 ## Showcase
 

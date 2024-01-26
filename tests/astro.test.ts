@@ -9,6 +9,7 @@ const modes = Object.keys({
   deno: {},
   netlify: {},
   vercel: {},
+  'netlify-static': undefined,
   'vercel-static': {},
   node: {},
 } as IAdapterOptions);
@@ -17,7 +18,6 @@ const modes = Object.keys({
 test.each(modes)('Astro build for multiple adapter modes: %s', async (mode) => {
   // Set the environment variable
   process.env.ASTRO_ADAPTER_MODE = mode;
-  process.env.ASTRO_OUTPUT = /static/.test(mode) ? "static" : "server";
 
   // Run the build command
   try {
@@ -34,7 +34,6 @@ test.each(modes)('Astro build for multiple adapter modes: %s', async (mode) => {
 
   // Unset the environment variable
   delete process.env.ASTRO_ADAPTER_MODE;
-  delete process.env.ASTRO_OUTPUT;
 }, {
   timeout: 15_000
 });
