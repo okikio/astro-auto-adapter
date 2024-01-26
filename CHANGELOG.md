@@ -1,3 +1,11 @@
+# [2.1.0](https://github.com/okikio/astro-auto-adapter/compare/v2.0.4...v2.1.0) (2024-01-26)
+
+
+### Features
+
+* support automatically selecting output mode ([faae4a2](https://github.com/okikio/astro-auto-adapter/commit/faae4a2515646ca6dd50cb3e773a3d5fed36241d))
+* update deps... ([4c28f78](https://github.com/okikio/astro-auto-adapter/commit/4c28f786c5797e11cb5365d90c0a4adfedf937bc))
+
 ## [2.0.4](https://github.com/okikio/astro-auto-adapter/compare/v2.0.3...v2.0.4) (2023-10-09)
 
 
