@@ -11,7 +11,7 @@ Supported Adapters:
 * [deno](https://docs.astro.build/en/guides/integrations-guide/deno/)
 * [cloudflare](https://docs.astro.build/en/guides/deploy/cloudflare/)
 * [vercel (static, and serverless)](https://docs.astro.build/en/guides/deploy/vercel/)
-* [netlify (static, and edge)](https://docs.astro.build/en/guides/deploy/netlify/)
+* [netlify](https://docs.astro.build/en/guides/deploy/netlify/)
 
 
 > **What's New? 🚀**
@@ -123,22 +123,6 @@ Configuration options for the Netlify adapter.
 
 ```ts
 import type { NetlifyAdapterOptions } from "astro-auto-adapter";
-```
-
-#### `NetlifyFunctionsAdapterOptions`
-
-Configuration options for the Netlify functions adapter.
-
-```ts
-import type { NetlifyFunctionsAdapterOptions } from "astro-auto-adapter";
-```
-
-#### `NetlifyStaticAdapterOptions`
-
-Configuration options for the Netlify static adapter.
-
-```ts
-import type { NetlifyStaticAdapterOptions } from "astro-auto-adapter";
 ```
 
 ### Environment Variable
