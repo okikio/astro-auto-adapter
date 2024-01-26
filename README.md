@@ -4,6 +4,7 @@
 
 [NPM](https://www.npmjs.com/package/astro-auto-adapter) <span style="padding-inline: 1rem">|</span> [GitHub](https://github.com/okikio/astro-auto-adapter#readme) <span style="padding-inline: 1rem">|</span> [Licence](./LICENSE)
 
+
 Let's you choose Astro Adapters based off of the `ASTRO_ADAPTER_MODE` environment variable. 
 
 Supported Adapters:
