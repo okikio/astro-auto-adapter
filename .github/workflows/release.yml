@@ -6,7 +6,10 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      packages: write # to be able to publish a GitHub package
       id-token: write
 
     steps:
@@ -51,26 +54,7 @@ jobs:
         run: pnpm pre-release
 
       - name: Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm semantic-release
-
-      # - name: Add lib, types and docs to Git
-      #   if: ${{ github.ref == 'refs/heads/main' }}
-      #   run: |
-      #     git add --force lib/
-
-      # - name: Commit files
-      #   if: ${{ github.ref == 'refs/heads/main' }}
-      #   run: |
-      #     git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      #     git config --local user.name "github-actions[bot]"
-      #     git commit -m "chore(gh-bot): :rocket: release" -a
-
-      # - name: Push changes
-      #   if: ${{ github.ref == 'refs/heads/main' }}
-      #   uses: ad-m/github-push-action@master
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     branch: ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
