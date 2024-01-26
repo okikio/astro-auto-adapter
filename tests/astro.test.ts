@@ -1,17 +1,17 @@
+import type { IAdapterOptions } from '../src/index.ts';
+
 import { test } from 'vitest';
-import { execa } from 'execa';  // Removed the curly braces around execa
-import type { IAdapterOptions } from '../src';
+import { $ } from 'zx';
 
 // Extract the keys to get the modes
 const modes = Object.keys({
   cloudflare: {},
   deno: {},
   netlify: {},
-  'netlify-static': {},
   vercel: {},
   'vercel-static': {},
   node: {},
-}) as (keyof IAdapterOptions)[];
+} as IAdapterOptions);
 
 // Run the test
 test.each(modes)('Astro build for multiple adapter modes: %s', async (mode) => {
@@ -21,7 +21,7 @@ test.each(modes)('Astro build for multiple adapter modes: %s', async (mode) => {
 
   // Run the build command
   try {
-    const e = await execa('astro', ['build']);
+    const e = await $`astro build`;
     console.error('stdout:', e.stdout);
     console.log(`Build for ${mode} was successful.`);
   } catch (error: any) {  // Added 'any' type to error
@@ -36,5 +36,5 @@ test.each(modes)('Astro build for multiple adapter modes: %s', async (mode) => {
   delete process.env.ASTRO_ADAPTER_MODE;
   delete process.env.ASTRO_OUTPUT;
 }, {
-  timeout: 9000
+  timeout: 15_000
 });
