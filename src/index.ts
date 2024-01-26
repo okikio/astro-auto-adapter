@@ -1,14 +1,13 @@
 import type { VercelServerlessConfig as VercelAdapterOptions } from "@astrojs/vercel/serverless";
 import type { VercelStaticConfig as VercelStaticAdapterOptions } from "@astrojs/vercel/static";
-import type { netlifyFunctions, netlifyStatic } from "@astrojs/netlify";
+import type createNetlifyIntegration from "@astrojs/netlify";
 import type createCloudflareWorkersIntegration from "@astrojs/cloudflare";
 import type createDenoIntegration from "@astrojs/deno";
 import type createNodeIntegration from "@astrojs/node";
 import type { AstroIntegration } from "astro";
 
 export type CloudflareAdapterOptions = Parameters<typeof createCloudflareWorkersIntegration>[0];
-export type NetlifyFunctionsAdapterOptions = Parameters<typeof netlifyFunctions>[0];
-export type NetlifyStaticAdapterOptions = Parameters<typeof netlifyStatic> extends never ? undefined | {} : Parameters<typeof netlifyStatic>[number];
+export type NetlifyAdapterOptions = Parameters<typeof createNetlifyIntegration>[0];
 export type NodeAdapterOptions = Parameters<typeof createNodeIntegration>[0];
 export type DenoAdapterOptions = Parameters<typeof createDenoIntegration>[0];
 export type { VercelAdapterOptions, VercelStaticAdapterOptions };
@@ -16,10 +15,13 @@ export type { VercelAdapterOptions, VercelStaticAdapterOptions };
 export interface IAdapterOptions {
   cloudflare?: CloudflareAdapterOptions;
   deno?: DenoAdapterOptions;
-  netlify?: NetlifyFunctionsAdapterOptions;
-  "netlify-static"?: NetlifyStaticAdapterOptions;
+  netlify?: NetlifyAdapterOptions;
   /**
-   * @deprecated Netlify Edge functions have been deprecated as a separate adapter https://github.com/withastro/astro/blob/main/packages/integrations/netlify/CHANGELOG.md#major-changes
+   * @deprecated Netlify Static functions have been deprecated as a separate adapter
+   */
+  "netlify-static"?: never;
+  /**
+   * @deprecated Netlify Edge functions have been deprecated as a separate adapter
    */
   "netlify-edge"?: never;
   vercel?: VercelAdapterOptions;
@@ -29,6 +31,7 @@ export interface IAdapterOptions {
    */
   "vercel-edge"?: never;
   node?: NodeAdapterOptions;
+  [type: string]: any
 }
 
 export const AUTO_ASTRO_ADAPTER_ENV_VAR = "ASTRO_ADAPTER_MODE";
@@ -36,7 +39,7 @@ export const AUTO_ASTRO_ADAPTER_ENV_VAR = "ASTRO_ADAPTER_MODE";
 // Augmenting the globalThis interface
 interface CustomGlobalThis {
   Deno?: { env?: Map<string, string> };
-  Netlify?: { env?: Map<string, string> };
+  // Netlify?: { env?: Map<string, string> };
 }
 
 // Create a type that combines globalThis with the custom properties
@@ -56,7 +59,7 @@ export function getEnv<T extends string>(name: T): string | undefined {
     return extendedGlobalThis?.Netlify?.env?.get?.(name);
   }
 
-  const env = extendedGlobalThis?.process?.env ?? {};
+  const env = (extendedGlobalThis as typeof globalThis)?.process?.env ?? {};
   return env?.[name];
 }
 
@@ -118,13 +121,10 @@ export async function adapter(
       });
     }
     case "netlify":
-    case "netlify-edge": {
-      const netlify = await import("@astrojs/netlify");
-      return netlify.netlifyFunctions(opts[type]);
-    }
+    case "netlify-edge": 
     case "netlify-static": {
-      const netlify = await import("@astrojs/netlify");
-      return netlify.netlifyStatic();
+      const netlify = (await import("@astrojs/netlify")).default;
+      return netlify(opts[type]);
     }
     case "vercel":
     case "vercel-edge": {
@@ -138,7 +138,7 @@ export async function adapter(
     case "node":
     default: {
       const node = (await import("@astrojs/node")).default;
-      const nodeOpts = (opts[type] ?? {}) as NodeAdapterOptions;
+      const nodeOpts = (opts[type] ?? {});
       return node({
         mode: "standalone",
         ...nodeOpts
