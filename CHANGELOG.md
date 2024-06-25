@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/okikio/astro-auto-adapter/compare/v2.1.0...v2.2.0) (2024-06-25)
+
+
+### Features
+
+* switch to @deno/astro-adapter ([9f885b8](https://github.com/okikio/astro-auto-adapter/commit/9f885b8bdd2de2a4a2e9f482e270e8b172f6155b))
+
 # [2.1.0](https://github.com/okikio/astro-auto-adapter/compare/v2.0.4...v2.1.0) (2024-01-26)
 
 
