@@ -1,5 +1,5 @@
 import { defineConfig } from 'astro/config';
-import { adapter, output } from "./src/index";
+import { adapter, output } from "./src/index.ts";
 
 // https://astro.build/config
 export default defineConfig({

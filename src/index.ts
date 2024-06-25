@@ -2,7 +2,7 @@ import type { VercelServerlessConfig as VercelAdapterOptions } from "@astrojs/ve
 import type { VercelStaticConfig as VercelStaticAdapterOptions } from "@astrojs/vercel/static";
 import type createNetlifyIntegration from "@astrojs/netlify";
 import type createCloudflareWorkersIntegration from "@astrojs/cloudflare";
-import type createDenoIntegration from "@astrojs/deno";
+import type createDenoIntegration from "@deno/astro-adapter";
 import type createNodeIntegration from "@astrojs/node";
 import type { AstroIntegration, AstroConfig } from "astro";
 
@@ -114,7 +114,7 @@ export async function adapter(
       return cloudflare(opts[type as "cloudflare"]);
     }
     case "deno": {
-      const deno = (await import("@astrojs/deno")).default;
+      const deno = (await import("@deno/astro-adapter")).default;
       const denoOpts = (opts[type] ?? {}) as DenoAdapterOptions;
       return deno({
         port: 4321,
