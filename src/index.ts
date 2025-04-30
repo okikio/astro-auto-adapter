@@ -1,5 +1,4 @@
-import type { VercelServerlessConfig as VercelAdapterOptions } from "@astrojs/vercel/serverless";
-import type { VercelStaticConfig as VercelStaticAdapterOptions } from "@astrojs/vercel/static";
+import type { VercelServerlessConfig as VercelAdapterOptions } from "@astrojs/vercel";
 import type createNetlifyIntegration from "@astrojs/netlify";
 import type createCloudflareWorkersIntegration from "@astrojs/cloudflare";
 import type createDenoIntegration from "@deno/astro-adapter";
@@ -10,7 +9,7 @@ export type CloudflareAdapterOptions = Parameters<typeof createCloudflareWorkers
 export type NetlifyAdapterOptions = Parameters<typeof createNetlifyIntegration>[0];
 export type NodeAdapterOptions = Parameters<typeof createNodeIntegration>[0];
 export type DenoAdapterOptions = Parameters<typeof createDenoIntegration>[0];
-export type { VercelAdapterOptions, VercelStaticAdapterOptions };
+export type { VercelAdapterOptions };
 
 export interface IAdapterOptions {
   cloudflare?: CloudflareAdapterOptions;
@@ -25,7 +24,10 @@ export interface IAdapterOptions {
    */
   "netlify-edge"?: never;
   vercel?: VercelAdapterOptions;
-  "vercel-static"?: VercelStaticAdapterOptions;
+  /**
+   * @deprecated Vercel Static functions have been deprecated as a separate adapter
+   */
+  "vercel-static"?: VercelAdapterOptions;
   /**
    * @deprecated Vercel Edge functions have now been deprecated as a seperate adapter https://github.com/withastro/astro/blob/main/packages/integrations/vercel/CHANGELOG.md#400
    */
@@ -128,13 +130,11 @@ export async function adapter(
       return netlify(opts[type]);
     }
     case "vercel":
-    case "vercel-edge": {
-      const vercel = (await import("@astrojs/vercel/serverless")).default;
-      return vercel(opts[type]);
-    }
+    case "vercel-edge": 
     case "vercel-static": {
-      const vercelStatic = (await import("@astrojs/vercel/static")).default;
-      return vercelStatic(opts[type]);
+      const vercel = (await import("@astrojs/vercel")).default;
+      const vercelOpts = opts[type] ?? {};
+      return vercel(vercelOpts);
     }
     case "node":
     default: {
@@ -154,11 +154,11 @@ export async function adapter(
  *
  * @param type which adapter to use
  * @param mode what output mode should be used; when unset uses the `ASTRO_OUPUT_MODE` env var
- * @returns Astro output mode, "static", "server", "hybrid"
+ * @returns Astro output mode, "static", "server" (default "static")
  */
 export function output(
   type: keyof IAdapterOptions | ("string" & {}) = getEnv(AUTO_ASTRO_ADAPTER_ENV_VAR) as keyof IAdapterOptions ?? getAutoAdapterType(),
-  mode = (getEnv(AUTO_ASTRO_OUTPUT_MODE_ENV_VAR) || "hybrid") as AstroConfig['output']
+  mode = (getEnv(AUTO_ASTRO_OUTPUT_MODE_ENV_VAR) || "static") as AstroConfig['output']
 ) {
   switch (type) {
     case "vercel-static":

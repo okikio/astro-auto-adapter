@@ -15,7 +15,9 @@ const modes = Object.keys({
 } as IAdapterOptions);
 
 // Run the test
-test.each(modes)('Astro build for multiple adapter modes: %s', async (mode) => {
+test.for(modes)('Astro build for multiple adapter modes: %s', {
+  timeout: 15_000
+}, async (mode) => {
   // Set the environment variable
   process.env.ASTRO_ADAPTER_MODE = mode;
 
@@ -34,6 +36,4 @@ test.each(modes)('Astro build for multiple adapter modes: %s', async (mode) => {
 
   // Unset the environment variable
   delete process.env.ASTRO_ADAPTER_MODE;
-}, {
-  timeout: 15_000
 });

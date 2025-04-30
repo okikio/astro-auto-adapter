@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  target: ["es2022", "node20"],
+  target: ["es2023", "node22"],
   entry: ['src/index.ts'],
   format: ["esm", "cjs"],
   sourcemap: true,
