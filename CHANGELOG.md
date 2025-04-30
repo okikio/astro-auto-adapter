@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/okikio/astro-auto-adapter/compare/v2.2.0...v2.3.0) (2025-04-30)
+
+
+### Features
+
+* update deps for astro v5 ([f5c75b6](https://github.com/okikio/astro-auto-adapter/commit/f5c75b6d205f3713a4b9d12610f597f9304012db))
+
 # [2.2.0](https://github.com/okikio/astro-auto-adapter/compare/v2.1.0...v2.2.0) (2024-06-25)
 
 
