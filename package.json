@@ -141,13 +141,13 @@
     "zx": "^8.7.2"
   },
   "peerDependencies": {
+    "astro": "^4 || ^5",
     "@astrojs/cloudflare": "^12",
     "@astrojs/netlify": "^6",
     "@astrojs/node": "^9",
     "@astrojs/vercel": "^8",
     "@deno/astro-adapter": "^0",
-    "astro-sst": "^3",
-    "astro": "^5"
+    "astro-sst": "^3"
   },
   "peerDependenciesMeta": {
     "@astrojs/cloudflare": {
