@@ -96,15 +96,14 @@
     "url": "https://github.com/okikio/astro-auto-adapter.git"
   },
   "keywords": [
-    "astro-utility",
     "withastro",
+    "astro-adapter",
+    "astro-utility",
     "cloudflare",
     "node",
     "deno",
     "vercel",
     "edge",
-    "astro-adapter",
-    "astro-integration",
     "serverless",
     "astro"
   ],
@@ -149,5 +148,25 @@
     "@deno/astro-adapter": "^0",
     "astro-sst": "^3",
     "astro": "^5"
+  },
+  "peerDependenciesMeta": {
+    "@astrojs/cloudflare": {
+      "optional": true
+    },
+    "@astrojs/netlify": {
+      "optional": true
+    },
+    "@astrojs/node": {
+      "optional": true
+    },
+    "@astrojs/vercel": {
+      "optional": true
+    },
+    "@deno/astro-adapter": {
+      "optional": true
+    },
+    "astro-sst": {
+      "optional": true
+    }
   }
 }
