@@ -1,3 +1,11 @@
+# [2.4.0](https://github.com/okikio/astro-auto-adapter/compare/v2.3.0...v2.4.0) (2025-08-05)
+
+
+### Features
+
+* add ability to register custom adapters ([ddb8af7](https://github.com/okikio/astro-auto-adapter/commit/ddb8af74651a1af675c50f085b2fdf17b8c75176))
+* better types & better tests ([9a59be7](https://github.com/okikio/astro-auto-adapter/commit/9a59be7db19ffa776779c1bdd8152201c152f3c6))
+
 # [2.3.0](https://github.com/okikio/astro-auto-adapter/compare/v2.2.0...v2.3.0) (2025-04-30)
 
 
