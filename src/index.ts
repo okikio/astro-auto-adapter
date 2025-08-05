@@ -3,18 +3,21 @@ import type createNetlifyIntegration from "@astrojs/netlify";
 import type createCloudflareWorkersIntegration from "@astrojs/cloudflare";
 import type createDenoIntegration from "@deno/astro-adapter";
 import type createNodeIntegration from "@astrojs/node";
+import type createSSTIntegration from "astro-sst";
 import type { AstroIntegration, AstroConfig } from "astro";
 
 export type CloudflareAdapterOptions = Parameters<typeof createCloudflareWorkersIntegration>[0];
 export type NetlifyAdapterOptions = Parameters<typeof createNetlifyIntegration>[0];
 export type NodeAdapterOptions = Parameters<typeof createNodeIntegration>[0];
 export type DenoAdapterOptions = Parameters<typeof createDenoIntegration>[0];
+export type SSTAdapterOptions = Parameters<typeof createSSTIntegration>[0];
 export type { VercelAdapterOptions };
 
 export interface IAdapterOptions {
   cloudflare?: CloudflareAdapterOptions;
   deno?: DenoAdapterOptions;
   netlify?: NetlifyAdapterOptions;
+  "sst"?: SSTAdapterOptions;
   /**
    * @deprecated Netlify Static functions have been deprecated as a separate adapter
    */
@@ -42,7 +45,7 @@ export const AUTO_ASTRO_OUTPUT_MODE_ENV_VAR = "ASTRO_OUTPUT_MODE";
 // Augmenting the globalThis interface
 interface CustomGlobalThis {
   Deno?: { env?: Map<string, string> };
-  // Netlify?: { env?: Map<string, string> };
+  Netlify?: { env?: Map<string, string> };
 }
 
 // Create a type that combines globalThis with the custom properties
@@ -113,7 +116,7 @@ export async function adapter(
   switch (type) {
     case "cloudflare": {
       const cloudflare = (await import("@astrojs/cloudflare")).default;
-      return cloudflare(opts[type as "cloudflare"]);
+      return cloudflare(opts[type]);
     }
     case "deno": {
       const deno = (await import("@deno/astro-adapter")).default;
@@ -128,6 +131,10 @@ export async function adapter(
     case "netlify-static": {
       const netlify = (await import("@astrojs/netlify")).default;
       return netlify(opts[type]);
+    }
+    case "sst": {
+      const sst = (await import("astro-sst")).default;
+      return sst(opts[type])
     }
     case "vercel":
     case "vercel-edge": 
@@ -169,6 +176,7 @@ export function output(
     case "cloudflare":
     case "deno":
     case "netlify":
+    case "sst":
     case "vercel":
     case "netlify-edge":
     case "vercel-edge":

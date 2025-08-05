@@ -2,6 +2,7 @@ import type { IAdapterOptions } from '../src/index.ts';
 
 import { test } from 'vitest';
 import { $ } from 'zx';
+import process from "node:process";
 
 // Extract the keys to get the modes
 const modes = Object.keys({
@@ -9,17 +10,22 @@ const modes = Object.keys({
   deno: {},
   netlify: {},
   vercel: {},
-  'netlify-static': undefined,
-  'vercel-static': {},
   node: {},
-} as IAdapterOptions);
+  sst: {},
+} as IAdapterOptions)
+.map(x => [[x, "static"], [x, "server"]]).flat(1);
 
 // Run the test
-test.for(modes)('Astro build for multiple adapter modes: %s', {
+test.for(modes)('Astro build for multiple adapter modes: [%s, %s]', {
   timeout: 15_000
-}, async (mode) => {
+}, async ([mode, output]) => {
   // Set the environment variable
   process.env.ASTRO_ADAPTER_MODE = mode;
+  process.env.ASTRO_OUTPUT_MODE = output;
+  console.log({
+    mode,
+    output
+  })
 
   // Run the build command
   try {
