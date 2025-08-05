@@ -367,14 +367,8 @@ const customAdapter = createTypedAdapter<CustomPlatformOptions>((options) => ({
   }
 }));
 
-// 3. Define your custom adapter types interface
-interface CustomAdapters {
-  railway: RailwayOptions;
-  'custom-platform': CustomPlatformOptions;
-}
-
-// 4. Use with full type safety!
-const astroAdapter = await adapter<CustomAdapters>("railway", {
+// 3. Use with full type safety!
+const astroAdapter = await adapter("railway", {
   railway: {
     region: "us-west", // ✅ IntelliSense + validation
     healthCheckPath: "/api/health", // ✅ Optional property
@@ -471,12 +465,6 @@ export interface RailwayOptions { /* ... */ }
 
 // types/digitalocean.ts  
 export interface DigitalOceanOptions { /* ... */ }
-
-// types/adapters.ts - Aggregate all custom adapters
-export interface CustomAdapters {
-  railway: RailwayOptions;
-  digitalocean: DigitalOceanOptions;
-}
 ```
 
 #### 4. **Provide Default Values in Factories**
@@ -646,19 +634,13 @@ export interface DigitalOceanOptions {
   region: 'nyc1' | 'sfo3' | 'fra1';
   enableBackups?: boolean;
 }
-
-// Define the custom adapters interface
-export interface CustomAdapters {
-  railway: RailwayOptions;
-  digitalocean: DigitalOceanOptions;
-}
 ```
 
 ```ts
 // astro.config.mjs - Use with full type safety
 import { defineConfig } from 'astro/config';
 import { adapter, output, createTypedAdapter } from 'astro-auto-adapter';
-import type { CustomAdapters, RailwayOptions, DigitalOceanOptions } from './types/adapters';
+import type { RailwayOptions, DigitalOceanOptions } from './types/adapters';
 
 // Create type-safe adapter factories
 const railwayAdapter = createTypedAdapter<RailwayOptions>(async (options) => {
@@ -682,7 +664,7 @@ const digitalOceanAdapter = createTypedAdapter<DigitalOceanOptions>(async (optio
 
 export default defineConfig({
   output: output('railway', 'server'),
-  adapter: await adapter<CustomAdapters>('railway', {
+  adapter: await adapter('railway', {
     railway: {
       region: 'us-west', // ✅ IntelliSense autocomplete!
       healthCheckPath: '/api/health',
@@ -699,14 +681,13 @@ export default defineConfig({
 
 ```ts
 // Alternative: Environment-based selection with type safety
-import type { CustomAdapters } from './types/adapters';
 import { getEnv } from "astro-auto-adapter";
 
 const adapterType = getEnv("DEPLOYMENT_TARGET") || 'railway';
 
 export default defineConfig({
   output: output(adapterType, 'server'),
-  adapter: await adapter<CustomAdapters>(adapterType as keyof CustomAdapters, {
+  adapter: await adapter(adapterType, {
     railway: {
       region: 'us-west', // ✅ Fully typed
       memory: 1024
