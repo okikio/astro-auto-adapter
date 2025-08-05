@@ -14,20 +14,163 @@ export type SSTAdapterOptions = Parameters<typeof createSSTIntegration>[0];
 export type { VercelAdapterOptions };
 
 /**
+ * Type definition for custom adapter factory functions.
+ * 
+ * Custom adapters can be either synchronous or asynchronous functions
+ * that return an Astro integration. This allows for maximum flexibility
+ * in adapter implementation.
+ * 
+ * @template TOptions - The type of options this adapter accepts
+ * @param options - Configuration options specific to the custom adapter
+ * @returns Either an AstroIntegration directly or a Promise resolving to one
+ * 
+ * @example
+ * ```ts
+ * interface RailwayOptions {
+ *   region: string;
+ *   healthCheckPath?: string;
+ * }
+ * 
+ * const railwayAdapter: AdapterFactory<RailwayOptions> = async (options) => {
+ *   // options is fully typed as RailwayOptions!
+ *   const { default: railway } = await import("@railway/astro-adapter");
+ *   return railway({
+ *     region: options.region, // ✅ Type-checked
+ *     healthCheckPath: options.healthCheckPath || "/health"
+ *   });
+ * };
+ * ```
+ */
+export type AdapterFactory<TOptions = any> = (options?: TOptions) => Promise<AstroIntegration> | AstroIntegration;
+
+/**
+ * Registry mapping custom adapter names to their factory functions.
+ * 
+ * This allows users to register custom adapters that can be used
+ * alongside the built-in adapters. The registry supports full type safety
+ * when using TypeScript with proper option types.
+ * 
+ * @example
+ * ```ts
+ * interface RailwayOptions {
+ *   region: string;
+ *   environmentId?: string;
+ * }
+ * 
+ * interface CustomOptions {
+ *   apiKey: string;
+ *   endpoint: string;
+ * }
+ * 
+ * const registry: AdapterRegistry = {
+ *   railway: createTypedAdapter<RailwayOptions>(async (opts) => {
+ *     const { default: railway } = await import("@railway/astro-adapter");
+ *     return railway(opts); // opts is RailwayOptions
+ *   }),
+ *   custom: createTypedAdapter<CustomOptions>((opts) => ({
+ *     name: "custom-adapter",
+ *     hooks: {
+ *       "astro:config:setup": ({ updateConfig }) => {
+ *         updateConfig({ 
+ *           output: "server",
+ *           vite: {
+ *             define: {
+ *               'process.env.API_KEY': JSON.stringify(opts.apiKey)
+ *             }
+ *           }
+ *         });
+ *       }
+ *     }
+ *   }))
+ * };
+ * ```
+ */
+export type AdapterRegistry = {
+  [adapterName: string]: AdapterFactory<any>;
+};
+
+/**
+ * Creates a type-safe adapter factory function.
+ * 
+ * This utility function provides full TypeScript support for custom adapters
+ * while maintaining compatibility with the adapter registry system.
+ * 
+ * @template TOptions - The type of options this adapter accepts
+ * @param factory - The adapter factory function with typed options
+ * @returns A typed adapter factory that can be used in the registry
+ * 
+ * @example
+ * ```ts
+ * interface RailwayOptions {
+ *   region: 'us-west' | 'us-east' | 'eu-west';
+ *   healthCheckPath?: string;
+ *   environmentId?: string;
+ * }
+ * 
+ * const railwayAdapter = createTypedAdapter<RailwayOptions>(async (options) => {
+ *   // Full type safety here!
+ *   const region = options.region; // Type: 'us-west' | 'us-east' | 'eu-west'
+ *   const healthPath = options.healthCheckPath ?? '/health';
+ *   
+ *   const { default: railway } = await import("@railway/astro-adapter");
+ *   return railway({
+ *     region,
+ *     healthCheckPath: healthPath,
+ *     environmentId: options.environmentId
+ *   });
+ * });
+ * 
+ * // Usage with full type checking:
+ * const astroAdapter = await adapter("railway", {
+ *   railway: {
+ *     region: "us-west", // ✅ Autocomplete + validation
+ *     healthCheckPath: "/api/health" // ✅ Optional property
+ *   },
+ *   register: {
+ *     railway: railwayAdapter
+ *   }
+ * });
+ * ```
+ */
+export function createTypedAdapter<TOptions = any>(
+  factory: AdapterFactory<TOptions>
+): AdapterFactory<TOptions> {
+  return factory;
+}
+
+/**
  * Comprehensive interface defining all supported adapter options.
  * 
  * Each property corresponds to a specific deployment platform adapter.
  * Only specify options for adapters you actually plan to use.
  * 
+ * @template TCustomAdapters - Custom adapter types for type safety
+ * 
  * @example
  * ```ts
+ * // Basic usage
  * const options: IAdapterOptions = {
  *   vercel: { webAnalytics: { enabled: true } },
  *   netlify: { builders: true }
  * };
+ * 
+ * // With custom adapters (type-safe)
+ * interface CustomAdapters {
+ *   railway: RailwayOptions;
+ *   custom: CustomOptions;
+ * }
+ * 
+ * const typedOptions: IAdapterOptions<CustomAdapters> = {
+ *   vercel: { webAnalytics: { enabled: true } },
+ *   railway: { region: "us-west" }, // ✅ Fully typed!
+ *   register: {
+ *     railway: createTypedAdapter<RailwayOptions>(...),
+ *     custom: createTypedAdapter<CustomOptions>(...)
+ *   }
+ * };
  * ```
  */
-export interface IAdapterOptions {
+export type IAdapterOptions<TCustomAdapters extends Record<string, any> = {}> = {
   /** Cloudflare Workers/Pages adapter options */
   cloudflare?: CloudflareAdapterOptions;
   /** Deno Deploy adapter options */
@@ -60,9 +203,30 @@ export interface IAdapterOptions {
   "vercel-edge"?: never;
   /** Node.js adapter options */
   node?: NodeAdapterOptions;
-  /** Extensibility for custom adapters */
-  [type: string]: any
-}
+
+  /**
+   * Registry of custom adapter factory functions.
+   * 
+   * Allows registration of custom adapters that can be used alongside built-in ones.
+   * Each key becomes a usable adapter type, and the value is a factory function
+   * that creates the adapter integration.
+   * 
+   * @example
+   * ```ts
+   * register: {
+   *   "railway": createTypedAdapter<RailwayOptions>(async (opts) => {
+   *     const railway = await import("@railway/astro-adapter");
+   *     return railway.default(opts);
+   *   }),
+   *   "custom": createTypedAdapter<CustomOptions>((opts) => createCustomAdapter(opts))
+   * }
+   * ```
+   */
+  register?: AdapterRegistry;
+
+  /** Extensibility for custom adapters via direct property access */
+  [type: string]: any;
+} & TCustomAdapters; // Merge custom adapter types for full type safety
 
 /**
  * Environment variable name for manually specifying the adapter type.
@@ -228,7 +392,7 @@ export function getAutoAdapterType(): keyof IAdapterOptions {
  */
 export async function safeImport(packageName: string) {
   try {
-    return await import(packageName);
+    return await import(/* @vite-ignore */ packageName);
   } catch (error) {
     throw new Error(
       `Package "${packageName}" is not installed. Please install it with:\n` +
@@ -237,6 +401,26 @@ export async function safeImport(packageName: string) {
     );
   }
 }
+
+/**
+ * Function overload for basic adapter usage without custom types.
+ * Provides backward compatibility and simple usage for built-in adapters.
+ */
+export function adapter(
+  type?: keyof IAdapterOptions | ("string" & {}),
+  opts?: IAdapterOptions
+): Promise<AstroIntegration>;
+
+/**
+ * Function overload for type-safe custom adapter usage.
+ * Provides full TypeScript support when using custom adapter types.
+ * 
+ * @template TCustomAdapters - Custom adapter types interface
+ */
+export function adapter<TCustomAdapters extends Record<string, any>>(
+  type: keyof (IAdapterOptions<TCustomAdapters>) | ("string" & {}),
+  opts: IAdapterOptions<TCustomAdapters>
+): Promise<AstroIntegration>;
 
 /**
  * Automatically selects and configures the appropriate Astro adapter for the target environment.
@@ -249,50 +433,104 @@ export async function safeImport(packageName: string) {
  * - Falls back to Node.js if no platform is detected
  * - Can be overridden with ASTRO_ADAPTER_MODE environment variable
  * 
+ * **Adapter Resolution Priority:**
+ * 1. Custom registered adapters (via opts.register)
+ * 2. Built-in adapters (vercel, netlify, etc.)
+ * 3. Node.js fallback for unknown types
+ * 
+ * **Type Safety for Custom Adapters:**
+ * - Use `createTypedAdapter<TOptions>()` for full type checking
+ * - Define custom adapter interfaces for IntelliSense support
+ * - Automatic type validation and autocomplete
+ * 
  * **Adapter Configuration:**
  * - Each adapter has sensible defaults but can be customized via options
  * - Deprecated adapters (static/edge variants) are handled with compatibility warnings
  * - Missing packages result in helpful installation instructions
  * 
  * @param type - The adapter type to use. If not provided, auto-detects based on environment
- * @param opts - Configuration options for each adapter type
+ * @param opts - Configuration options for each adapter type, including custom registrations
  * @returns Promise resolving to a configured Astro integration
  * 
  * @throws Error if the specified adapter package is not installed
  * 
  * @example
  * ```ts
- * // Auto-detect environment
+ * // Auto-detect environment (basic usage)
  * const autoAdapter = await adapter();
  * 
- * // Explicitly specify Vercel with options
+ * // Built-in adapter with options
  * const vercelAdapter = await adapter("vercel", {
- *   vercel: { 
- *     webAnalytics: { enabled: true },
- *     speedInsights: { enabled: true }
+ *   vercel: { webAnalytics: { enabled: true } }
+ * });
+ * 
+ * // Type-safe custom adapter usage
+ * interface RailwayOptions {
+ *   region: 'us-west' | 'us-east' | 'eu-west';
+ *   healthCheckPath?: string;
+ * }
+ * 
+ * interface CustomAdapters {
+ *   railway: RailwayOptions;
+ * }
+ * 
+ * const customAdapter = await adapter<CustomAdapters>("railway", {
+ *   railway: {
+ *     region: "us-west", // ✅ Autocomplete + type checking!
+ *     healthCheckPath: "/health"
+ *   },
+ *   register: {
+ *     railway: createTypedAdapter<RailwayOptions>(async (opts) => {
+ *       const { default: railway } = await import("@railway/astro-adapter");
+ *       return railway(opts);
+ *     })
  *   }
  * });
  * 
- * // Use environment variable override
+ * // Environment variable override
  * process.env.ASTRO_ADAPTER_MODE = "netlify";
  * const netlifyAdapter = await adapter(); // Uses Netlify despite auto-detection
  * ```
  * 
  * @see {@link getAutoAdapterType} for auto-detection logic
  * @see {@link IAdapterOptions} for configuration options
+ * @see {@link AdapterRegistry} for custom adapter registration
+ * @see {@link createTypedAdapter} for type-safe custom adapters
  */
-export async function adapter(
-  type: keyof IAdapterOptions | ("string" & {}) = getEnv(AUTO_ASTRO_ADAPTER_ENV_VAR) as keyof IAdapterOptions ?? getAutoAdapterType(),
+export async function adapter<TCustomAdapters extends Record<string, any> = {}>(
+  type: keyof (IAdapterOptions<TCustomAdapters>) | ("string" & {}) = getEnv(AUTO_ASTRO_ADAPTER_ENV_VAR) as keyof IAdapterOptions<TCustomAdapters> ?? getAutoAdapterType(),
   opts: IAdapterOptions = {}
 ): Promise<AstroIntegration> {
+  // First, check if this is a custom registered adapter
+  const registry = opts.register || {};
+  if (type in registry) {
+    const customAdapterFactory = registry[type as keyof typeof registry];
+    try {
+      // Get the configuration for this custom adapter
+      const customAdapterOptions = opts[type as string];
+
+      // Call the factory function (handle both sync and async)
+      const result = customAdapterFactory(customAdapterOptions);
+
+      // Return the integration (await if it's a Promise)
+      return await Promise.resolve(result);
+    } catch (error) {
+      throw new Error(
+        `Failed to create custom adapter "${type as string}": ${error instanceof Error ? error.message : 'Unknown error'}\n` +
+        `Check your adapter factory function for errors.`,
+        { cause: error }
+      );
+    }
+  }
+
   switch (type) {
     case "cloudflare": {
       const cloudflare = (await safeImport("@astrojs/cloudflare")).default;
-      return cloudflare(opts[type]);
+      return cloudflare(opts[type as "cloudflare"]);
     }
     case "deno": {
       const deno = (await safeImport("@deno/astro-adapter")).default;
-      const denoOpts = (opts[type] ?? {}) as DenoAdapterOptions;
+      const denoOpts = (opts[type as "deno"] ?? {}) as DenoAdapterOptions;
       return deno({
         port: 4321,
         ...denoOpts
@@ -308,11 +546,12 @@ export async function adapter(
     case "netlify-edge": 
     case "netlify-static": {
       const netlify = (await safeImport("@astrojs/netlify")).default;
-      return netlify(opts[type]);
+      return netlify(opts[type as "netlify"]);
     }
+
     case "sst": {
       const sst = (await safeImport("astro-sst")).default;
-      return sst(opts[type])
+      return sst(opts[type as "sst"])
     }
 
     /**
@@ -324,7 +563,7 @@ export async function adapter(
     case "vercel-edge": 
     case "vercel-static": {
       const vercel = (await safeImport("@astrojs/vercel")).default;
-      const vercelOpts = opts[type] ?? {};
+      const vercelOpts = opts[type as "vercel"] ?? {};
       return vercel(vercelOpts);
     }
 
@@ -335,8 +574,17 @@ export async function adapter(
      */
     case "node":
     default: {
+      // If it's an unknown type (not "node"), provide helpful guidance
+      if (type !== "node") {
+        console.warn(
+          `Unknown adapter type "${type as string}". Falling back to Node.js adapter.\n` +
+          `To use custom adapters, register them via the 'register' option:\n` +
+          `  register: { "${type as string}": (opts) => yourAdapterFactory(opts) }`
+        );
+      }
+
       const node = (await safeImport("@astrojs/node")).default;
-      const nodeOpts = (opts[type] ?? {});
+      const nodeOpts = (opts[type as "node"] ?? {});
 
       // Default to standalone mode for simpler deployment
       // Users can override by providing mode: "middleware" in options
@@ -348,6 +596,25 @@ export async function adapter(
   }
 }
 
+/**
+ * Function overload for basic adapter usage without custom types.
+ * Provides backward compatibility and simple usage for built-in adapters.
+ */
+export function output(
+  type?: keyof IAdapterOptions | ("string" & {}),
+  mode?: (AstroConfig['output'] & {})
+): AstroConfig['output'];
+
+/**
+ * Function overload for type-safe custom adapter usage.
+ * Provides full TypeScript support when using custom adapter types.
+ * 
+ * @template TCustomAdapters - Custom adapter types interface
+ */
+export function output<TCustomAdapters extends Record<string, any>>(
+  type: keyof (IAdapterOptions<TCustomAdapters>) | ("string" & {}),
+  mode: (AstroConfig['output'] & {})
+): AstroConfig['output'];
 
 /**
  * Automatically selects the appropriate Astro output mode for the target environment.
@@ -355,11 +622,17 @@ export async function adapter(
  * Output modes determine how Astro renders pages:
  * - "static": Pre-renders all pages at build time (fastest, most compatible)
  * - "server": Renders pages on-demand at request time (enables SSR features)
+ * - "hybrid": (Astro v4 only) Mix of static and server rendering per page
+ * 
+ * **Version Compatibility:**
+ * - Astro v4: Supports "static", "server", and "hybrid" modes
+ * - Astro v5+: "hybrid" deprecated, use "server"/"static" with selective prerendering
+ * - Both versions support selective rendering via `export const prerender = true|false;`
  * 
  * **Important Notes:**
- * - As of Astro v5, "hybrid" mode is deprecated
- * - Both "server" and "static" modes support selective rendering via `export const prerender = true|false;`
  * - This function primarily handles legacy adapter configurations
+ * - Modern Astro projects should set output mode directly in astro.config.mjs
+ * - Function gracefully handles hybrid mode for backward compatibility
  * 
  * @param type - The adapter type being used (affects default mode selection)
  * @param mode - Explicit output mode, or falls back to ASTRO_OUTPUT_MODE env var, then "static"
@@ -373,20 +646,22 @@ export async function adapter(
  * // Explicit server mode for SSR
  * const serverMode = output("netlify", "server");
  * 
+ * // Hybrid mode (Astro v4) - gracefully handled in v5
+ * const hybridMode = output("vercel", "hybrid"); // Works in v4, falls back to "server" in v5
+ * 
  * // Environment variable override
  * process.env.ASTRO_OUTPUT_MODE = "server";
  * const envMode = output("vercel"); // Returns "server"
  * ```
  * 
- * @deprecated This function is primarily for legacy compatibility.
- * Modern Astro projects should set output mode directly in astro.config.mjs
+ * @see {@link https://docs.astro.build/en/guides/on-demand-rendering/ Astro Rendering Modes}
  */
-export function output(
-  type: keyof IAdapterOptions | ("string" & {}) = getEnv(AUTO_ASTRO_ADAPTER_ENV_VAR) as keyof IAdapterOptions ?? getAutoAdapterType(),
+export function output<TCustomAdapters extends Record<string, any> = {}>(
+  type: keyof IAdapterOptions<TCustomAdapters> | ("string" & {}) = getEnv(AUTO_ASTRO_ADAPTER_ENV_VAR) ?? getAutoAdapterType(),
   
   // I added the `{}` this is to ensure for older versions of Astro you won't see a type-error when entering hybrid
   mode = (getEnv(AUTO_ASTRO_OUTPUT_MODE_ENV_VAR) || "static") as (AstroConfig['output'] & {}) 
-) {
+): AstroConfig['output'] {
   switch (type) {
     /**
      * Legacy Static Adapters:
@@ -402,6 +677,8 @@ export function output(
      * Modern Adapters:
      * All current adapters support both static and server modes
      * Return the user-specified mode or environment variable override
+     * 
+     * Note: hybrid mode is handled above and converted if necessary
      */
     case "node":
     case "cloudflare":
