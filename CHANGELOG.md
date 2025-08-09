@@ -1,3 +1,10 @@
+## [2.4.1](https://github.com/okikio/astro-auto-adapter/compare/v2.4.0...v2.4.1) (2025-08-09)
+
+
+### Bug Fixes
+
+* publish the lib js files ([c3a03fb](https://github.com/okikio/astro-auto-adapter/commit/c3a03fbdbfdcc2aabccefca01b2ffea3dfdf8c99))
+
 # [2.4.0](https://github.com/okikio/astro-auto-adapter/compare/v2.3.0...v2.4.0) (2025-08-05)
 
 
