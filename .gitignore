@@ -112,6 +112,7 @@ docs/
 /playwright-report/
 /playwright/.cache/
 /benchmark/results/
+test-astro-dist/
 
 # build output
 dist/

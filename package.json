@@ -5,31 +5,31 @@
   "sideEffects": false,
   "description": "Let's you choose between Astro Adapters based off of the `ASTRO_ADAPTER_MODE` environment variable.",
   "access": "public",
-  "legacy": "lib/index.cjs",
-  "main": "lib/index.cjs",
-  "browser": "lib/index.js",
-  "module": "lib/index.js",
+  "legacy": "dist/index.cjs",
+  "main": "dist/index.cjs",
+  "browser": "dist/index.js",
+  "module": "dist/index.js",
   "exports": {
     ".": {
       "require": {
-        "types": "./lib/index.d.cts",
-        "default": "./lib/index.cjs"
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
       },
       "import": {
-        "types": "./lib/index.d.ts",
-        "default": "./lib/index.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
-    "./lib/*": "./lib/*",
+    "./dist/*": "./dist/*",
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
   "directories": {
-    "lib": "./lib",
+    "dist": "./dist",
     "src": "./src"
   },
   "files": [
-    "lib",
+    "dist",
     "src"
   ],
   "publishConfig": {
@@ -68,7 +68,7 @@
         "@semantic-release/github",
         {
           "assets": [
-            "lib/**",
+            "dist/**",
             "src/**"
           ]
         }

@@ -5,5 +5,6 @@ import { adapter, output } from "./src/index.ts";
 export default defineConfig({
   output: output(),
   adapter: await adapter(),
-  srcDir: "./example"
+  srcDir: "./example",
+  outDir: "./test-astro-dist"
 });
