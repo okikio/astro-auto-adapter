@@ -132,3 +132,6 @@ pnpm-debug.log*
 .vercel
 # Local Netlify folder
 .netlify
+
+# npm lockfile (project uses pnpm)
+package-lock.json
