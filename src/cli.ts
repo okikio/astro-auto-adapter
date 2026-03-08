@@ -44,11 +44,25 @@ import pc from "picocolors";
 // Constants
 // ---------------------------------------------------------------------------
 
-/**
- * Package version (injected at build time by tsdown via `package.json`).
- * Falls back to "0.0.0" when running directly from source.
- */
-const VERSION = "0.0.0"; // replaced by build
+/** Fallback package version when `package.json` cannot be read. */
+const VERSION_FALLBACK = "0.0.0";
+
+/** Resolves the CLI version from the nearest package manifest. */
+export async function getCliVersion(
+  packageJsonUrl = new URL("../package.json", import.meta.url)
+): Promise<string> {
+  try {
+    const raw = await readFile(packageJsonUrl, "utf8");
+    const pkg = JSON.parse(raw) as { version?: unknown };
+    if (typeof pkg.version === "string" && pkg.version.length > 0) {
+      return pkg.version;
+    }
+  } catch {
+    // Fall back to a placeholder when running without a package manifest.
+  }
+
+  return VERSION_FALLBACK;
+}
 
 /**
  * Metadata for every built-in adapter supported by astro-auto-adapter.
@@ -375,6 +389,15 @@ export async function listAdapters(): Promise<void> {
  * @returns A promise that resolves when setup is complete.
  */
 export async function runInit(): Promise<void> {
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    process.stdout.write(
+      "astro-auto-adapter init requires an interactive terminal.\n" +
+      "Run `astro-auto-adapter add <adapter>` or install adapter packages manually instead.\n" +
+      `Available adapters: ${ADAPTERS.map((adapter) => adapter.value).join(", ")}\n`
+    );
+    return;
+  }
+
   intro(pc.bgCyan(pc.black(" astro-auto-adapter ")));
 
   log.info(
@@ -664,7 +687,7 @@ export async function runRemove(adapterArgs: string[]): Promise<void> {
 export async function main(argv: string[] = process.argv.slice(2)): Promise<void> {
   // -- flags -----------------------------------------------------------------
   if (argv.includes("--version") || argv.includes("-v")) {
-    process.stdout.write(`astro-auto-adapter v${VERSION}\n`);
+    process.stdout.write(`astro-auto-adapter v${await getCliVersion()}\n`);
     return;
   }
 

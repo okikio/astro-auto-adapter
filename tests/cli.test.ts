@@ -8,6 +8,7 @@ import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import process from "node:process";
+import { pathToFileURL } from "node:url";
 
 import {
   ADAPTERS,
@@ -15,8 +16,12 @@ import {
   buildInstallCommand,
   buildRemoveCommand,
   getInstalledAdapters,
+  getCliVersion,
   runCommand,
 } from "../src/cli.ts";
+
+const ENV_KEYS = ["PACKAGE_MANAGER", "npm_config_user_agent"] as const;
+type RestoredEnv = Partial<Record<(typeof ENV_KEYS)[number], string | undefined>>;
 
 // ============================================================
 // Shared test helpers
@@ -81,15 +86,24 @@ describe("ADAPTERS constant", () => {
 // ============================================================
 
 describe("detectPackageManager", () => {
-  let originalEnv: NodeJS.ProcessEnv;
+  let originalEnv: RestoredEnv;
 
-  beforeEach(async () => {
-    originalEnv = { ...process.env };
+  beforeEach(() => {
+    originalEnv = {
+      PACKAGE_MANAGER: process.env.PACKAGE_MANAGER,
+      npm_config_user_agent: process.env.npm_config_user_agent,
+    };
   });
 
   afterEach(() => {
-    // Restore env
-    process.env = originalEnv;
+    for (const key of ENV_KEYS) {
+      const originalValue = originalEnv[key];
+      if (originalValue === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = originalValue;
+      }
+    }
   });
 
   test("respects PACKAGE_MANAGER env override", () => {
@@ -314,5 +328,30 @@ describe("runCommand", () => {
 
   test("returns false for a nonexistent command", () => {
     expect(runCommand("this-command-does-not-exist-xyz", true)).toBe(false);
+  });
+});
+
+// ============================================================
+// getCliVersion
+// ============================================================
+
+describe("getCliVersion", () => {
+  test("reads the version from a package.json file", async () => {
+    const tmpDir = await makeTmpDir();
+    const pkgPath = join(tmpDir, "package.json");
+
+    await writeFile(pkgPath, JSON.stringify({ version: "1.2.3" }));
+
+    await expect(getCliVersion(pathToFileURL(pkgPath))).resolves.toBe(
+      "1.2.3"
+    );
+  });
+
+  test("falls back when package.json is missing or invalid", async () => {
+    const missing = join(await makeTmpDir(), "missing-package.json");
+
+    await expect(getCliVersion(pathToFileURL(missing))).resolves.toBe(
+      "0.0.0"
+    );
   });
 });
