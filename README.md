@@ -40,13 +40,26 @@ Let's you choose Astro Adapters based off of the `ASTRO_ADAPTER_MODE` environmen
 
 ## Installation
 
-**Quick Install:**
+**Interactive setup (recommended):**
+
+After installing `astro-auto-adapter`, use the interactive CLI to choose which
+platforms you want to support. The wizard detects your package manager and
+installs the required adapter packages for you:
 
 ```bash
-pnpm astro add astro-auto-adapter
+# First install the package
+pnpm add astro-auto-adapter
+
+# Then run the setup wizard
+pnpm astro-auto-adapter init
 ```
 
-**Custom Install:**
+The wizard will prompt you to select one or more deployment platforms and will
+install the required adapter packages automatically.
+
+---
+
+**Manual install:**
 
 ```bash
 pnpm install astro-auto-adapter
@@ -88,6 +101,85 @@ yarn add astro-auto-adapter @astrojs/vercel
 </details>
 
 ## Usage
+
+### CLI
+
+`astro-auto-adapter` ships with an interactive command-line tool powered by
+[clack](https://clack.cc/). The CLI makes it easy to set up adapter support
+for the first time, and to add or remove adapters as your project evolves.
+
+#### Commands
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `init` | _(default)_ | Interactive setup wizard – choose platforms & install adapters |
+| `add [adapter…]` | | Add one or more adapter packages |
+| `remove [adapter…]` | `rm` | Remove adapter packages |
+| `list` | `ls` | Show all adapters and their installation status |
+
+#### Global flags
+
+| Flag | Description |
+|------|-------------|
+| `-h, --help` | Print help and exit |
+| `-v, --version` | Print the version and exit |
+
+#### First-time setup
+
+```bash
+pnpm astro-auto-adapter init
+```
+
+This will show a multiselect prompt where you choose which deployment platforms
+to support, then install the required packages using your package manager.
+
+#### Add an adapter
+
+```bash
+# Interactive — shows a prompt
+pnpm astro-auto-adapter add
+
+# Direct — installs without a prompt
+pnpm astro-auto-adapter add vercel
+pnpm astro-auto-adapter add vercel netlify
+```
+
+#### Remove an adapter
+
+```bash
+# Interactive — shows a prompt with installed adapters
+pnpm astro-auto-adapter remove
+
+# Direct — removes without a prompt
+pnpm astro-auto-adapter remove vercel
+```
+
+#### List adapters
+
+```bash
+pnpm astro-auto-adapter list
+```
+
+```
+◇  Available Adapters ──────────────────────────────────────╮
+│                                                           │
+│    Node.js         @astrojs/node            ✓ installed  │
+│    Vercel          @astrojs/vercel          ✓ installed  │
+│    Netlify         @astrojs/netlify           not installed│
+│    Cloudflare      @astrojs/cloudflare        not installed│
+│    Deno            @deno/astro-adapter        not installed│
+│    SST (AWS)       astro-sst                  not installed│
+│                                                           │
+├───────────────────────────────────────────────────────────╯
+```
+
+#### Environment variables (CLI)
+
+| Variable | Description |
+|----------|-------------|
+| `PACKAGE_MANAGER` | Override the detected package manager (`npm`, `pnpm`, `yarn`, `bun`) |
+
+---
 
 ### `adapter` Function
 
