@@ -6,13 +6,18 @@ export default defineConfig([
   // Marked platform-neutral so bundlers can tree-shake it for any runtime.
   {
     entry: ['src/index.ts'],
-    format: ['esm', 'cjs'],
+    format: ['esm'],
     dts: true,
     clean: true,
     sourcemap: true,
     outDir: 'dist',
     platform: 'neutral',
     treeshake: true,
+    rolldownOptions: {
+      checks: {
+        pluginTimings: false,
+      },
+    },
     outputOptions: {
       exports: 'named',
     },
@@ -30,6 +35,11 @@ export default defineConfig([
     outDir: 'dist',
     platform: 'node',
     treeshake: true,
+    rolldownOptions: {
+      checks: {
+        pluginTimings: false,
+      },
+    },
     // The shebang in src/cli.ts is preserved automatically by tsdown.
   },
 ]);
