@@ -5,21 +5,28 @@
   "sideEffects": false,
   "description": "Let's you choose between Astro Adapters based off of the `ASTRO_ADAPTER_MODE` environment variable.",
   "access": "public",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "browser": "dist/index.js",
   "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
       "default": "./dist/index.js"
     },
     "./dist/*": "./dist/*",
     "./src/*": "./src/*",
     "./package.json": "./package.json",
     "./cli": {
-      "import": {
-        "default": "./dist/cli.mjs"
-      }
+      "default": "./dist/cli.mjs"
     }
   },
   "directories": {

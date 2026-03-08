@@ -2,11 +2,11 @@ import { defineConfig } from 'tsdown';
 
 export default defineConfig([
   // ── Library bundle ────────────────────────────────────────────────────────
-  // Pure-ESM + CJS dual build for the adapter selection API.
+  // ESM + CJS dual build for the adapter selection API.
   // Marked platform-neutral so bundlers can tree-shake it for any runtime.
   {
     entry: ['src/index.ts'],
-    format: ['esm'],
+    format: ['esm', 'cjs'],
     dts: true,
     clean: true,
     sourcemap: true,
