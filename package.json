@@ -57,7 +57,7 @@
     "semantic-release": "semantic-release"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "release": {
     "branches": [

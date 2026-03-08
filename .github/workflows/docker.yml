@@ -92,7 +92,9 @@ jobs:
           build-args: |
             ASTRO_ADAPTER_MODE=node
             ASTRO_OUTPUT_MODE=server
-        # Attest the image digest for supply-chain security
+
+      # Attest the image digest for supply-chain security (non-PR only)
+      - name: Generate artifact attestation
         if: github.event_name != 'pull_request'
         uses: actions/attest-build-provenance@v2
         with:
