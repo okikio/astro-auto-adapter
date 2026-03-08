@@ -13,7 +13,7 @@
 #   docker build --secret id=NPM_TOKEN,env=NPM_TOKEN .
 # ============================================================
 
-ARG NODE_VERSION=22
+ARG NODE_VERSION=24
 ARG PNPM_VERSION=10
 
 # ────────────────────────────────────────────────────────────
@@ -32,7 +32,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # Mount pnpm store as a cache; never baked into the image
 # Mount NPM_TOKEN as a build secret if a private registry is needed
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
-    --mount=type=secret,id=NPM_TOKEN,env=NPM_TOKEN \
+    --mount=type=secret,id=NPM_TOKEN,required=false \
     pnpm install --frozen-lockfile --ignore-scripts
 
 # ────────────────────────────────────────────────────────────
