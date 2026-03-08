@@ -146,6 +146,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          # This job only runs on non-PR events, so OCI export always pushes.
           push: true
           tags: ${{ steps.oci-meta.outputs.tags }}
           labels: ${{ steps.oci-meta.outputs.labels }}
