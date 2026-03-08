@@ -18,6 +18,7 @@ import {
   getInstalledAdapters,
   getCliVersion,
   runCommand,
+  type PackageManager,
 } from "../src/cli.ts";
 
 const ENV_KEYS = ["PACKAGE_MANAGER", "npm_config_user_agent"] as const;
@@ -136,12 +137,96 @@ describe("detectPackageManager", () => {
     expect(detectPackageManager()).toBe("bun");
   });
 
+  test("detects vlt from user agent", () => {
+    delete process.env.PACKAGE_MANAGER;
+    process.env.npm_config_user_agent = "vlt/1.0.0 node/v20.0.0";
+    expect(detectPackageManager()).toBe("vlt");
+  });
+
+  test("detects deno from user agent", () => {
+    delete process.env.PACKAGE_MANAGER;
+    process.env.npm_config_user_agent = "deno/2.0.0 node/v20.0.0";
+    expect(detectPackageManager()).toBe("deno");
+  });
+
+  test("respects PACKAGE_MANAGER=vlt override", () => {
+    process.env.PACKAGE_MANAGER = "vlt";
+    delete process.env.npm_config_user_agent;
+    expect(detectPackageManager()).toBe("vlt");
+  });
+
+  test("respects PACKAGE_MANAGER=deno override", () => {
+    process.env.PACKAGE_MANAGER = "deno";
+    delete process.env.npm_config_user_agent;
+    expect(detectPackageManager()).toBe("deno");
+  });
+
   test("ignores invalid PACKAGE_MANAGER values", () => {
     process.env.PACKAGE_MANAGER = "pip";
     delete process.env.npm_config_user_agent;
     // Should not return "pip"; falls through to lockfile or default
     const result = detectPackageManager();
-    expect(["npm", "pnpm", "yarn", "bun"]).toContain(result);
+    expect(["npm", "pnpm", "yarn", "bun", "vlt", "deno"]).toContain(result);
+  });
+});
+
+// ============================================================
+// detectPackageManager – lockfile detection
+// ============================================================
+
+describe("detectPackageManager (lockfile detection)", () => {
+  let originalEnv: RestoredEnv;
+  let originalCwd: string;
+  let tmpDir: string;
+
+  beforeEach(async () => {
+    originalEnv = {
+      PACKAGE_MANAGER: process.env.PACKAGE_MANAGER,
+      npm_config_user_agent: process.env.npm_config_user_agent,
+    };
+    delete process.env.PACKAGE_MANAGER;
+    delete process.env.npm_config_user_agent;
+    originalCwd = process.cwd();
+    tmpDir = await makeTmpDir();
+    process.chdir(tmpDir);
+  });
+
+  afterEach(() => {
+    process.chdir(originalCwd);
+    for (const key of ENV_KEYS) {
+      const originalValue = originalEnv[key];
+      if (originalValue === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = originalValue;
+      }
+    }
+  });
+
+  test("detects vlt from vlt-lock.json", async () => {
+    await writeFile(join(tmpDir, "vlt-lock.json"), "{}");
+    expect(detectPackageManager()).toBe("vlt");
+  });
+
+  test("detects deno from deno.lock", async () => {
+    await writeFile(join(tmpDir, "deno.lock"), "{}");
+    expect(detectPackageManager()).toBe("deno");
+  });
+
+  test("deno.lock takes precedence over package-lock.json", async () => {
+    await writeFile(join(tmpDir, "deno.lock"), "{}");
+    await writeFile(join(tmpDir, "package-lock.json"), "{}");
+    expect(detectPackageManager()).toBe("deno");
+  });
+
+  test("vlt-lock.json takes precedence over package-lock.json", async () => {
+    await writeFile(join(tmpDir, "vlt-lock.json"), "{}");
+    await writeFile(join(tmpDir, "package-lock.json"), "{}");
+    expect(detectPackageManager()).toBe("vlt");
+  });
+
+  test("defaults to npm when no lockfile is present", () => {
+    expect(detectPackageManager()).toBe("npm");
   });
 });
 
@@ -174,6 +259,18 @@ describe("buildInstallCommand", () => {
     );
   });
 
+  test("builds correct vlt install command", () => {
+    expect(buildInstallCommand(["@astrojs/vercel"], "vlt")).toBe(
+      "vlt install -D @astrojs/vercel"
+    );
+  });
+
+  test("builds correct deno install command", () => {
+    expect(buildInstallCommand(["@astrojs/vercel"], "deno")).toBe(
+      "deno add --dev @astrojs/vercel"
+    );
+  });
+
   test("installs multiple packages in one command", () => {
     expect(
       buildInstallCommand(["@astrojs/vercel", "@astrojs/netlify"], "pnpm")
@@ -183,6 +280,18 @@ describe("buildInstallCommand", () => {
   test("respects asDev=false for production dependencies", () => {
     expect(buildInstallCommand(["@astrojs/node"], "npm", false)).toBe(
       "npm install @astrojs/node"
+    );
+  });
+
+  test("respects asDev=false for vlt production dependencies", () => {
+    expect(buildInstallCommand(["@astrojs/node"], "vlt", false)).toBe(
+      "vlt install @astrojs/node"
+    );
+  });
+
+  test("respects asDev=false for deno production dependencies", () => {
+    expect(buildInstallCommand(["@astrojs/node"], "deno", false)).toBe(
+      "deno add @astrojs/node"
     );
   });
 });
@@ -213,6 +322,18 @@ describe("buildRemoveCommand", () => {
   test("builds correct bun remove command", () => {
     expect(buildRemoveCommand(["@astrojs/vercel"], "bun")).toBe(
       "bun remove @astrojs/vercel"
+    );
+  });
+
+  test("builds correct vlt uninstall command", () => {
+    expect(buildRemoveCommand(["@astrojs/vercel"], "vlt")).toBe(
+      "vlt uninstall @astrojs/vercel"
+    );
+  });
+
+  test("builds correct deno remove command", () => {
+    expect(buildRemoveCommand(["@astrojs/vercel"], "deno")).toBe(
+      "deno remove @astrojs/vercel"
     );
   });
 
