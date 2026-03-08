@@ -22,17 +22,17 @@
  */
 
 import process from "node:process";
-import { execSync, spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { resolve, join } from "node:path";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   intro,
   outro,
   cancel,
   isCancel,
   multiselect,
-  select,
   confirm,
   spinner,
   note,
@@ -713,10 +713,9 @@ function normaliseSlashes(p: string): string {
 }
 
 const isMain =
-  typeof process !== "undefined" &&
   process.argv[1] != null &&
   normaliseSlashes(process.argv[1]) ===
-    normaliseSlashes(new URL(import.meta.url).pathname);
+    normaliseSlashes(fileURLToPath(import.meta.url));
 
 if (isMain) {
   main().catch((err: unknown) => {
