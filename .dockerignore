@@ -1,0 +1,42 @@
+# ── build artifacts ──────────────────────────────────────────
+dist/
+app-dist/
+test-astro-dist/
+.astro/
+*.tsbuildinfo
+
+# ── source control ───────────────────────────────────────────
+.git
+.gitignore
+
+# ── dev tooling & configs ────────────────────────────────────
+.github/
+.devcontainer/
+.gitpod.Dockerfile
+.gitpod.yml
+
+# ── test files ───────────────────────────────────────────────
+tests/
+coverage/
+
+# ── dependencies (installed fresh in container) ──────────────
+node_modules/
+
+# ── logs & debug ─────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── env & secrets (never bake these in!) ─────────────────────
+.env
+.env.*
+!.env.example
+
+# ── editor & OS artefacts ────────────────────────────────────
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
