@@ -128,24 +128,53 @@ export type AdapterValue = (typeof ADAPTERS)[number]["value"];
 // ---------------------------------------------------------------------------
 
 /**
+ * Union of all package manager names recognised by this CLI.
+ *
+ * Covers every manager tracked by the
+ * {@link https://benchmarks.vlt.sh/#/package-managers/clean vlt benchmarks}
+ * plus Deno's built-in package management:
+ *
+ * | Manager | Lockfile          | User-agent prefix |
+ * |---------|-------------------|-------------------|
+ * | npm     | package-lock.json | `npm/`            |
+ * | pnpm    | pnpm-lock.yaml    | `pnpm/`           |
+ * | yarn    | yarn.lock         | `yarn/`           |
+ * | bun     | bun.lock(b)       | `bun/`            |
+ * | vlt     | vlt-lock.json     | `vlt/`            |
+ * | deno    | deno.lock         | `deno/`           |
+ */
+export type PackageManager = "npm" | "pnpm" | "yarn" | "bun" | "vlt" | "deno";
+
+/** All recognised package manager names (used for runtime validation). */
+const PACKAGE_MANAGERS: readonly PackageManager[] = [
+  "npm",
+  "pnpm",
+  "yarn",
+  "bun",
+  "vlt",
+  "deno",
+] as const;
+
+/**
  * Attempts to detect the package manager in use by inspecting lockfiles in
  * the current working directory, and by checking for well-known environment
  * variables set by package manager environments.
  *
  * Detection order:
  *  1. `PACKAGE_MANAGER` env var (explicit override).
- *  2. `npm_config_user_agent` — set by npm, pnpm, yarn, bun when running scripts.
+ *  2. `npm_config_user_agent` — set by npm, pnpm, yarn, bun, vlt when running scripts.
  *  3. Lockfile presence: `pnpm-lock.yaml` → pnpm, `yarn.lock` → yarn,
- *     `bun.lockb` / `bun.lock` → bun, `package-lock.json` → npm.
+ *     `bun.lockb` / `bun.lock` → bun, `deno.lock` → deno,
+ *     `vlt-lock.json` → vlt, `package-lock.json` → npm.
  *  4. Falls back to `npm`.
  *
- * @returns The name of the detected package manager ("npm" | "pnpm" | "yarn" | "bun").
+ * @returns The name of the detected package manager.
  */
-export function detectPackageManager(): "npm" | "pnpm" | "yarn" | "bun" {
+export function detectPackageManager(): PackageManager {
   // 1. Explicit override
   const override = process.env.PACKAGE_MANAGER;
-  if (override && ["npm", "pnpm", "yarn", "bun"].includes(override)) {
-    return override as "npm" | "pnpm" | "yarn" | "bun";
+  if (override && (PACKAGE_MANAGERS as readonly string[]).includes(override)) {
+    return override as PackageManager;
   }
 
   // 2. User agent set during script execution
@@ -153,21 +182,43 @@ export function detectPackageManager(): "npm" | "pnpm" | "yarn" | "bun" {
   if (userAgent.startsWith("pnpm")) return "pnpm";
   if (userAgent.startsWith("yarn")) return "yarn";
   if (userAgent.startsWith("bun")) return "bun";
+  if (userAgent.startsWith("vlt")) return "vlt";
+  if (userAgent.startsWith("deno")) return "deno";
   if (userAgent.startsWith("npm")) return "npm";
 
   // 3. Lockfile detection
   const cwd = process.cwd();
   if (existsSync(join(cwd, "pnpm-lock.yaml"))) return "pnpm";
   if (existsSync(join(cwd, "yarn.lock"))) return "yarn";
-  if (
-    existsSync(join(cwd, "bun.lockb")) ||
-    existsSync(join(cwd, "bun.lock"))
-  )
+  if (existsSync(join(cwd, "bun.lockb")) || existsSync(join(cwd, "bun.lock")))
     return "bun";
+  if (existsSync(join(cwd, "deno.lock"))) return "deno";
+  if (existsSync(join(cwd, "vlt-lock.json"))) return "vlt";
   if (existsSync(join(cwd, "package-lock.json"))) return "npm";
 
   return "npm";
 }
+
+/**
+ * Per-manager install and remove sub-command configuration.
+ *
+ * | Manager | install sub-cmd | dev flag      | remove sub-cmd |
+ * |---------|-----------------|---------------|----------------|
+ * | npm     | install         | --save-dev    | uninstall      |
+ * | pnpm    | add             | -D            | remove         |
+ * | yarn    | add             | --dev         | remove         |
+ * | bun     | add             | -D            | remove         |
+ * | vlt     | install         | -D            | uninstall      |
+ * | deno    | add             | --dev         | remove         |
+ */
+const PM_CONFIG: Record<PackageManager, { installCmd: string; devFlag: string; removeCmd: string }> = {
+  npm:  { installCmd: "install", devFlag: "--save-dev", removeCmd: "uninstall" },
+  pnpm: { installCmd: "add",     devFlag: "-D",         removeCmd: "remove" },
+  yarn: { installCmd: "add",     devFlag: "--dev",      removeCmd: "remove" },
+  bun:  { installCmd: "add",     devFlag: "-D",         removeCmd: "remove" },
+  vlt:  { installCmd: "install", devFlag: "-D",         removeCmd: "uninstall" },
+  deno: { installCmd: "add",     devFlag: "--dev",      removeCmd: "remove" },
+};
 
 /**
  * Builds the shell command that installs the given packages as dev dependencies
@@ -181,20 +232,22 @@ export function detectPackageManager(): "npm" | "pnpm" | "yarn" | "bun" {
  * @example
  * buildInstallCommand(["@astrojs/vercel"], "pnpm")
  * // → "pnpm add -D @astrojs/vercel"
+ *
+ * @example
+ * buildInstallCommand(["@astrojs/vercel"], "vlt")
+ * // → "vlt install -D @astrojs/vercel"
+ *
+ * @example
+ * buildInstallCommand(["@astrojs/vercel"], "deno")
+ * // → "deno add --dev @astrojs/vercel"
  */
 export function buildInstallCommand(
   packages: string[],
-  pm: "npm" | "pnpm" | "yarn" | "bun",
+  pm: PackageManager,
   asDev = true
 ): string {
-  const config: Record<"npm" | "pnpm" | "yarn" | "bun", { cmd: string; devFlag: string }> = {
-    npm:  { cmd: "install", devFlag: "--save-dev" },
-    pnpm: { cmd: "add",     devFlag: "-D" },
-    yarn: { cmd: "add",     devFlag: "--dev" },
-    bun:  { cmd: "add",     devFlag: "-D" },
-  };
-  const { cmd, devFlag } = config[pm];
-  return `${pm} ${cmd} ${asDev ? devFlag + " " : ""}${packages.join(" ")}`;
+  const { installCmd, devFlag } = PM_CONFIG[pm];
+  return `${pm} ${installCmd} ${asDev ? devFlag + " " : ""}${packages.join(" ")}`;
 }
 
 /**
@@ -206,9 +259,9 @@ export function buildInstallCommand(
  */
 export function buildRemoveCommand(
   packages: string[],
-  pm: "npm" | "pnpm" | "yarn" | "bun"
+  pm: PackageManager
 ): string {
-  const removeCmd = pm === "npm" ? "uninstall" : "remove";
+  const { removeCmd } = PM_CONFIG[pm];
   return `${pm} ${removeCmd} ${packages.join(" ")}`;
 }
 
@@ -314,7 +367,7 @@ ${pc.bold("Examples:")}
 ${pc.bold("Environment variables:")}
   ${pc.cyan("ASTRO_ADAPTER_MODE")}    Adapter to use at build / runtime
   ${pc.cyan("ASTRO_OUTPUT_MODE")}     Output mode: "static" | "server"
-  ${pc.cyan("PACKAGE_MANAGER")}       Override detected package manager
+  ${pc.cyan("PACKAGE_MANAGER")}       Override detected package manager (npm, pnpm, yarn, bun, vlt, deno)
 
 ${pc.bold("Learn more:")}
   ${pc.underline("https://github.com/okikio/astro-auto-adapter")}

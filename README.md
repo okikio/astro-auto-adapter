@@ -96,6 +96,15 @@ npm install astro-auto-adapter @astrojs/vercel
 
 # yarn
 yarn add astro-auto-adapter @astrojs/vercel
+
+# bun
+bun add astro-auto-adapter @astrojs/vercel
+
+# vlt
+vlt install astro-auto-adapter @astrojs/vercel
+
+# deno
+deno add astro-auto-adapter @astrojs/vercel
 ```
 
 </details>
@@ -177,7 +186,24 @@ pnpm astro-auto-adapter list
 
 | Variable | Description |
 |----------|-------------|
-| `PACKAGE_MANAGER` | Override the detected package manager (`npm`, `pnpm`, `yarn`, `bun`) |
+| `PACKAGE_MANAGER` | Override the detected package manager (`npm`, `pnpm`, `yarn`, `bun`, `vlt`, `deno`) |
+
+#### Supported package managers
+
+The CLI auto-detects your package manager from the `npm_config_user_agent` environment variable
+(set automatically when running scripts) and from lockfile presence.
+All managers tracked by the [vlt package manager benchmarks](https://benchmarks.vlt.sh/#/package-managers/clean) are supported:
+
+| Manager | Lockfile          | Install flag | Remove sub-command |
+|---------|-------------------|--------------|--------------------|
+| `npm`   | `package-lock.json` | `--save-dev` | `uninstall` |
+| `pnpm`  | `pnpm-lock.yaml`  | `-D`         | `remove` |
+| `yarn`  | `yarn.lock`       | `--dev`      | `remove` |
+| `bun`   | `bun.lock(b)`     | `-D`         | `remove` |
+| `vlt`   | `vlt-lock.json`   | `-D`         | `uninstall` |
+| `deno`  | `deno.lock`       | `--dev`      | `remove` |
+
+You can override detection at any time by setting `PACKAGE_MANAGER=<name>` in your environment.
 
 ---
 

@@ -432,8 +432,13 @@ export async function wrapImport<T>(packageName: string, promise: T): Promise<T>
     return await promise;
   } catch (error) {
     throw new Error(
-      `Package "${packageName}" is not installed. Please install it with:\n` +
-      `pnpm add ${packageName}`,
+      `Package "${packageName}" is not installed. Please install it with your package manager, e.g.:\n` +
+      `  npm install ${packageName}\n` +
+      `  pnpm add ${packageName}\n` +
+      `  yarn add ${packageName}\n` +
+      `  bun add ${packageName}\n` +
+      `  vlt install ${packageName}\n` +
+      `  deno add ${packageName}`,
       { cause: error }
     );
   }
