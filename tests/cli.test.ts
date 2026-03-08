@@ -18,7 +18,6 @@ import {
   getInstalledAdapters,
   getCliVersion,
   runCommand,
-  type PackageManager,
 } from "../src/cli.ts";
 
 const ENV_KEYS = ["PACKAGE_MANAGER", "npm_config_user_agent"] as const;

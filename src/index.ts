@@ -422,8 +422,13 @@ export function getAutoAdapterType(): keyof IAdapterOptions {
  * try {
  *   const vercel = await wrapImport("@astrojs/vercel", import("@astrojs/vercel"));
  * } catch (error) {
- *   // Error: Package "@astrojs/vercel" is not installed. Please install it with:
- *   // pnpm add @astrojs/vercel
+ *   // Error: Package "@astrojs/vercel" is not installed. Please install it with your package manager, e.g.:
+ *   //   npm install @astrojs/vercel
+ *   //   pnpm add @astrojs/vercel
+ *   //   yarn add @astrojs/vercel
+ *   //   bun add @astrojs/vercel
+ *   //   vlt install @astrojs/vercel
+ *   //   deno add @astrojs/vercel
  * }
  * ```
  */
