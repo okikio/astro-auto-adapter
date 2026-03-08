@@ -162,7 +162,7 @@ const PACKAGE_MANAGERS: readonly PackageManager[] = [
  *
  * Detection order:
  *  1. `PACKAGE_MANAGER` env var (explicit override).
- *  2. `npm_config_user_agent` — set by npm, pnpm, yarn, bun, vlt when running scripts.
+ *  2. `npm_config_user_agent` — set by npm, pnpm, yarn, bun, vlt, deno when running scripts.
  *  3. Lockfile presence: `pnpm-lock.yaml` → pnpm, `yarn.lock` → yarn,
  *     `bun.lockb` / `bun.lock` → bun, `deno.lock` → deno,
  *     `vlt-lock.json` → vlt, `package-lock.json` → npm.
