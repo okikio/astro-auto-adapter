@@ -105,7 +105,6 @@ jobs:
   # Separate job to build OCI image format explicitly
   build-oci:
     name: Build OCI Image
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -141,7 +140,29 @@ jobs:
             type=sha,prefix=sha-,format=short
             type=raw,value=latest,enable={{is_default_branch}}
 
+      - name: Build OCI image artifact
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          # Validate OCI output on pull requests without publishing to GHCR.
+          outputs: type=oci,dest=/tmp/astro-auto-adapter-oci.tar,oci-mediatypes=true
+          labels: ${{ steps.oci-meta.outputs.labels }}
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
+          build-args: |
+            ASTRO_ADAPTER_MODE=node
+            ASTRO_OUTPUT_MODE=server
+
+      - name: Verify OCI artifact was created
+        if: github.event_name == 'pull_request'
+        run: ls -lh /tmp/astro-auto-adapter-oci.tar
+
       - name: Build and push OCI image
+        if: github.event_name != 'pull_request'
         id: oci-push
         uses: docker/build-push-action@v6
         with:
