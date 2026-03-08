@@ -182,6 +182,7 @@ jobs:
             ASTRO_OUTPUT_MODE=server
 
       - name: Generate OCI artifact attestation
+        if: github.event_name != 'pull_request'
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
