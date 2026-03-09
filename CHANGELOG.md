@@ -1,3 +1,26 @@
+# [2.5.0](https://github.com/okikio/astro-auto-adapter/compare/v2.4.1...v2.5.0) (2026-03-09)
+
+
+### Bug Fixes
+
+* add registry-url to setup-node and update all actions to latest versions ([08dd6c9](https://github.com/okikio/astro-auto-adapter/commit/08dd6c98f3d7be6a5a2bdf822eeb8527179e7c91))
+* address remaining cli review feedback ([e56649a](https://github.com/okikio/astro-auto-adapter/commit/e56649a68531930347be010f92bdb8267c2098c9))
+* **cli:** address review feedback - JSDoc deno, unused import, wrapImport example ([335c2a8](https://github.com/okikio/astro-auto-adapter/commit/335c2a86c5d74161a9b4ca3e8fc3c2fc834e10fb))
+* gate OCI attestation to published builds ([f8a3a1f](https://github.com/okikio/astro-auto-adapter/commit/f8a3a1f0190345c6748a91da4e35289599638290))
+* **package.json:** add explicit types inside import/require export conditions ([ee5a330](https://github.com/okikio/astro-auto-adapter/commit/ee5a33004bc9860a9b5f5c77474ed90ab55f79ae))
+* repair broken docker.yml step + update Node to v24 ([20dda54](https://github.com/okikio/astro-auto-adapter/commit/20dda546335094f2179f7ae0f64d164a2ecf73bd))
+* repair docker build secret mount syntax ([ac5dc0a](https://github.com/okikio/astro-auto-adapter/commit/ac5dc0a25e70271c6365710165efeedb4e788de2))
+* restore dual package output and explicit cli imports ([ce1f2dc](https://github.com/okikio/astro-auto-adapter/commit/ce1f2dcaf9c2631119304395de51b0e8e3033f7c))
+* stabilize docker ci and switch package to esm ([17ad5d3](https://github.com/okikio/astro-auto-adapter/commit/17ad5d35f127af0cf71827e1fc847cfc753c8efd))
+* use npm Trusted Publishers (OIDC) in release workflow instead of NPM_TOKEN ([a127bda](https://github.com/okikio/astro-auto-adapter/commit/a127bda49101ed44c0a75e810b744d153d7bacf6))
+* validate OCI image builds on pull requests ([ce616b2](https://github.com/okikio/astro-auto-adapter/commit/ce616b2405c680be919c6c6a941ae47ebb4a5e9d))
+
+
+### Features
+
+* add interactive CLI using @clack/prompts (init/add/remove/list) ([e438d8d](https://github.com/okikio/astro-auto-adapter/commit/e438d8da2592c9d549bbedff684336ddfc513927))
+* **cli:** extend package manager support to vlt and deno ([f946119](https://github.com/okikio/astro-auto-adapter/commit/f946119cc5c588f7fc486d48cd5a80aac0882f88))
+
 ## [2.4.1](https://github.com/okikio/astro-auto-adapter/compare/v2.4.0...v2.4.1) (2025-08-09)
 
 
