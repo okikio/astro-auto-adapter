@@ -1,5 +1,14 @@
 name: Release
 
+# Manually triggered release workflow.
+#
+# Authentication: Uses npm Trusted Publishers (OIDC) instead of a long-lived
+# NPM_TOKEN secret. Before using this workflow, configure the package on
+# npmjs.com as a Trusted Publisher linked to this repository:
+#   https://www.npmjs.com/package/astro-auto-adapter/access
+#
+# No NPM_TOKEN secret is required once Trusted Publishers is configured.
+
 on: workflow_dispatch
 
 jobs:
@@ -7,11 +16,11 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      packages: write
-      id-token: write
+      contents: write      # Push commits/tags and create GitHub releases
+      issues: write        # Comment on released issues
+      pull-requests: write # Comment on released pull requests
+      packages: write      # Publish GitHub Packages (if used)
+      id-token: write      # Required for npm Trusted Publishers (OIDC) and provenance attestation
 
     steps:
       - name: Checkout
@@ -35,11 +44,40 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Pre-release
+      - name: Pre-release (test + build)
         run: pnpm pre-release
 
-      - name: Release
-        run: pnpm semantic-release
+      - name: Release (version bump, changelog, GitHub release)
+        id: release
+        # semantic-release handles: version bump in package.json, CHANGELOG.md,
+        # release commit + tag, and GitHub release creation.
+        # npm publishing is intentionally disabled here (npmPublish: false in
+        # package.json) and handled separately in the next step via OIDC.
+        run: |
+          # Capture the most-recent version tag before the release so we can
+          # detect whether semantic-release actually created a new release.
+          # Filter to vX.Y.Z tags only and sort by semantic version.
+          BEFORE_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "")
+
+          pnpm semantic-release
+
+          # After semantic-release runs, check whether a new tag was created.
+          # Fetch tags in case semantic-release pushed them to the remote only.
+          git fetch --tags --quiet 2>/dev/null || true
+          AFTER_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "")
+          if [ -n "$AFTER_TAG" ] && [ "$BEFORE_TAG" != "$AFTER_TAG" ]; then
+            echo "new_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "new_release=false" >> "$GITHUB_OUTPUT"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm (OIDC Trusted Publishers)
+        # Only publish when semantic-release actually created a new release.
+        if: steps.release.outputs.new_release == 'true'
+        # Uses npm Trusted Publishers (OIDC) — no NPM_TOKEN secret is required.
+        # npm automatically obtains a short-lived access token from GitHub's
+        # OIDC provider, verified against the Trusted Publisher configuration
+        # on npmjs.com. provenance is enabled in publishConfig (package.json).
+        run: npm publish
