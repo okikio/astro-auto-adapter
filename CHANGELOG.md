@@ -1,3 +1,10 @@
+## [2.5.4](https://github.com/okikio/astro-auto-adapter/compare/v2.5.3...v2.5.4) (2026-04-06)
+
+
+### Bug Fixes
+
+* revert Node.js version to 22 in Dockerfile ([9c50c3f](https://github.com/okikio/astro-auto-adapter/commit/9c50c3f244df6e3876738df17ad73b58fafec620))
+
 ## [2.5.3](https://github.com/okikio/astro-auto-adapter/compare/v2.5.2...v2.5.3) (2026-04-06)
 
 
