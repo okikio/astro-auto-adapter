@@ -169,7 +169,7 @@ export type BuiltInAdapterOptions = {
   deno?: DenoAdapterOptions;
   /** Netlify Functions/Edge adapter options */
   netlify?: NetlifyAdapterOptions;
-  /** SST (Serverless Stack) AWS adapter options */
+  /** SST (Serverless Stack) AWS adapter options. Astro 6 server mode is still pending upstream. */
   "sst"?: SSTAdapterOptions;
   /**
    * @deprecated Netlify Static functions have been deprecated as a separate adapter.
@@ -298,6 +298,7 @@ export const AUTO_ASTRO_OUTPUT_MODE_ENV_VAR = "ASTRO_OUTPUT_MODE";
  * - Node.js: process.env
  */
 interface CustomGlobalThis {
+  Bun?: { version?: string };
   Deno?: { env?: Map<string, string> };
   Netlify?: { env?: Map<string, string> };
 }
@@ -325,7 +326,7 @@ type ExtendedGlobalThis = typeof globalThis & CustomGlobalThis;
  * ```
  */
 export function getEnv<T extends string>(name: T): string | undefined {
-  const extendedGlobalThis: ExtendedGlobalThis = globalThis;
+  const extendedGlobalThis: ExtendedGlobalThis = globalThis as ExtendedGlobalThis;
   if ("Deno" in extendedGlobalThis) {
     return extendedGlobalThis?.Deno?.env?.get?.(name);
   }

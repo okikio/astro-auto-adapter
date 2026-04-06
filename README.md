@@ -22,7 +22,7 @@ Let's you choose Astro Adapters based off of the `ASTRO_ADAPTER_MODE` environmen
 > For example, if you're deploying on `Vercel`, the `VERCEL` environment variable is set to `1`, and we'll automatically choose the `Vercel` adapter for you. Neat, right?
 > 
 > **Recent Updates:**
-> - Added SST (Serverless Stack) adapter support for AWS deployments
+> - Added SST (Serverless Stack) adapter support for AWS deployments, with Astro 6 currently limited to static output
 > - Deprecated separate static/edge adapters (now handled by main adapters)
 > - Improved auto-detection for deployment environments
 > 
@@ -37,6 +37,7 @@ Let's you choose Astro Adapters based off of the `ASTRO_ADAPTER_MODE` environmen
 > - Only install the adapters you actually use to avoid a large list of adapters you don't use
 > - This package uses peer dependencies, so adapter versions are managed by your project
 > - Future adapter updates don't require updating `astro-auto-adapter`
+> - SST currently supports Astro 6 static output only; `server` mode is waiting on `astro-sst`
 
 ## Installation
 
@@ -273,6 +274,8 @@ import type { NetlifyAdapterOptions } from "astro-auto-adapter";
 
 Configuration options for the SST (Serverless Stack) adapter.
 
+On Astro 6, pair SST with `output("sst", "static")` for now. `server` mode is still blocked upstream in `astro-sst`.
+
 ```ts
 import type { SSTAdapterOptions } from "astro-auto-adapter";
 ```
@@ -360,13 +363,10 @@ const astroAdapter = await adapter("netlify", { netlify: options });
 ```ts
 import { adapter } from "astro-auto-adapter";
 
-/** @type {import('astro-auto-adapter').SSTAdapterOptions} */
-const options = {
-  responseMode: "stream", // or "buffer"
-};
-
-const astroAdapter = await adapter("sst", { sst: options });
+const astroAdapter = await adapter("sst");
 ```
+
+Use `output("sst", "static")` on Astro 6 until `astro-sst` catches up on server entrypoints.
 
 #### Vercel
 
@@ -646,8 +646,8 @@ const outputMode = output('netlify', 'server');
 **3. Using with SST:**
 
 ```ts
-// Use the server output for SST
-const outputMode = output('sst', 'server');
+// Astro 6 currently supports SST in static mode only
+const outputMode = output('sst', 'static');
 ```
 
 **4. Hybrid Mode (Astro v4 & v5 Compatible):**
@@ -691,7 +691,7 @@ const outputMode = output();
 - Cloudflare
 - Deno
 - Node.js
-- SST (Serverless Stack)
+- SST (Serverless Stack, Astro 6 static output only for now)
 - Custom adapters via `register` option
 
 #### Version Compatibility:

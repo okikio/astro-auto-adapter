@@ -86,7 +86,16 @@ export async function getCliVersion(
  *  - `envVars` – environment variables this platform sets automatically
  *                (used for auto-detection inside the library).
  */
-export const ADAPTERS = [
+type AdapterMetadata = {
+  label: string;
+  value: "node" | "vercel" | "netlify" | "cloudflare" | "deno" | "sst";
+  pkg: string;
+  hint: string;
+  envVars: readonly string[];
+  compatibilityNote?: string;
+};
+
+export const ADAPTERS: readonly AdapterMetadata[] = [
   {
     label: "Node.js",
     value: "node",
@@ -126,8 +135,9 @@ export const ADAPTERS = [
     label: "SST (AWS)",
     value: "sst",
     pkg: "astro-sst",
-    hint: "AWS Lambda via SST / OpenNext",
+    hint: "AWS via SST / OpenNext",
     envVars: [],
+    compatibilityNote: "Astro 6 currently supports static output only for SST.",
   },
 ] as const;
 
@@ -430,6 +440,13 @@ export async function listAdapters(): Promise<void> {
     `${lines.join("\n")}`,
     "Available Adapters"
   );
+
+  const caveats = ADAPTERS.filter((adapter) => adapter.compatibilityNote)
+    .map((adapter) => `${styles.bold(adapter.label)}: ${adapter.compatibilityNote}`);
+
+  if (caveats.length > 0) {
+    note(caveats.join("\n"), "Compatibility Notes");
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -502,6 +519,15 @@ export async function runInit(): Promise<void> {
   const toInstall = (selected as AdapterValue[]).filter(
     (v) => !installed.has(v)
   );
+
+  const compatibilityNotes = (selected as AdapterValue[])
+    .map((value) => ADAPTERS.find((adapter) => adapter.value === value))
+    .filter((adapter) => adapter?.compatibilityNote)
+    .map((adapter) => `${styles.bold(adapter!.label)}: ${adapter!.compatibilityNote}`);
+
+  if (compatibilityNotes.length > 0) {
+    note(compatibilityNotes.join("\n"), "Compatibility Notes");
+  }
 
   if (toInstall.length === 0) {
     outro(
@@ -636,6 +662,15 @@ export async function runAdd(adapterArgs: string[]): Promise<void> {
     (v) => ADAPTERS.find((a) => a.value === v)!.pkg
   );
   const installCmd = buildInstallCommand(packages, pm);
+
+  const compatibilityNotes = toInstall
+    .map((value) => ADAPTERS.find((adapter) => adapter.value === value))
+    .filter((adapter) => adapter?.compatibilityNote)
+    .map((adapter) => `${styles.bold(adapter!.label)}: ${adapter!.compatibilityNote}`);
+
+  if (compatibilityNotes.length > 0) {
+    note(compatibilityNotes.join("\n"), "Compatibility Notes");
+  }
 
   const s = spinner();
   s.start(`Adding ${packages.join(", ")}…`);
