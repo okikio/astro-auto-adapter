@@ -11,6 +11,10 @@ name: Release
 
 on: workflow_dispatch
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
     name: Release
@@ -23,6 +27,13 @@ jobs:
       id-token: write      # Required for npm Trusted Publishers (OIDC) and provenance attestation
 
     steps:
+      - name: Ensure workflow is running on main
+        run: |
+          if [ "$GITHUB_REF_NAME" != "main" ]; then
+            echo "This workflow must be run from the main branch." >&2
+            exit 1
+          fi
+
       - name: Checkout
         uses: actions/checkout@v6
         with:
@@ -32,7 +43,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
         with:
-          version: latest
+          version: 10.33.0
           run_install: false
 
       - name: Setup Node.js environment
@@ -44,6 +55,13 @@ jobs:
           # Publishers (OIDC). Do NOT set NODE_AUTH_TOKEN — npm will obtain
           # a short-lived token from GitHub's OIDC provider automatically.
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Upgrade npm for trusted publishing
+        # npm Trusted Publishers requires npm 11.5.1+.
+        run: |
+          npm install --global npm@^11.5.1
+          node --version
+          npm --version
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -77,9 +95,30 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Determine whether npm publish is needed
+        id: publish-check
+        run: |
+          PACKAGE_NAME=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; const pkg = JSON.parse(readFileSync('./package.json', 'utf8')); console.log(pkg.name);")
+          LOCAL_VERSION=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; const pkg = JSON.parse(readFileSync('./package.json', 'utf8')); console.log(pkg.version);")
+          REMOTE_VERSION=$(npm view "$PACKAGE_NAME" version --silent 2>/dev/null || echo "")
+
+          echo "package_name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "local_version=$LOCAL_VERSION" >> "$GITHUB_OUTPUT"
+          echo "remote_version=$REMOTE_VERSION" >> "$GITHUB_OUTPUT"
+
+          if [ "$LOCAL_VERSION" != "$REMOTE_VERSION" ]; then
+            echo "publish_needed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish_needed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "Local version: $LOCAL_VERSION"
+          echo "Remote version: ${REMOTE_VERSION:-<missing>}"
+
       - name: Publish to npm (OIDC Trusted Publishers)
-        # Only publish when semantic-release actually created a new release.
-        if: steps.release.outputs.new_release == 'true'
+        # Publish whenever the checked-out package version differs from npm.
+        # This keeps reruns recoverable if semantic-release succeeded but npm publish failed.
+        if: steps.publish-check.outputs.publish_needed == 'true'
         # Uses npm Trusted Publishers (OIDC) — no NPM_TOKEN secret is required.
         # npm automatically obtains a short-lived access token from GitHub's
         # OIDC provider, verified against the Trusted Publisher configuration

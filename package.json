@@ -1,6 +1,7 @@
 {
   "name": "astro-auto-adapter",
   "version": "0.0.0",
+  "packageManager": "pnpm@10.33.0",
   "type": "module",
   "sideEffects": false,
   "description": "Let's you choose between Astro Adapters based off of the `ASTRO_ADAPTER_MODE` environment variable.",
@@ -100,7 +101,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/okikio/astro-auto-adapter.git"
+    "url": "git+https://github.com/okikio/astro-auto-adapter.git"
   },
   "keywords": [
     "withastro",
@@ -172,7 +173,7 @@
     }
   },
   "bin": {
-    "astro-auto-adapter": "./dist/cli.mjs"
+    "astro-auto-adapter": "dist/cli.mjs"
   },
   "dependencies": {
     "@clack/prompts": "^1.2.0"
