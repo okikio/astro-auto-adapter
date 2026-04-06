@@ -1,3 +1,10 @@
+## [2.5.1](https://github.com/okikio/astro-auto-adapter/compare/v2.5.0...v2.5.1) (2026-04-06)
+
+
+### Bug Fixes
+
+* update Node.js version in Dockerfile and install pnpm directly to avoid Corepack issues ([ce9bf20](https://github.com/okikio/astro-auto-adapter/commit/ce9bf201e84031b0d973973b44148ab9b156a882))
+
 # [2.5.0](https://github.com/okikio/astro-auto-adapter/compare/v2.4.1...v2.5.0) (2026-03-09)
 
 
