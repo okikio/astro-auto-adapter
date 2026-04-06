@@ -1,3 +1,10 @@
+## [2.5.2](https://github.com/okikio/astro-auto-adapter/compare/v2.5.1...v2.5.2) (2026-04-06)
+
+
+### Bug Fixes
+
+* update deps... ([62b1478](https://github.com/okikio/astro-auto-adapter/commit/62b1478f2536875deccce1cfbdc33910fab4487e))
+
 ## [2.5.1](https://github.com/okikio/astro-auto-adapter/compare/v2.5.0...v2.5.1) (2026-04-06)
 
 
