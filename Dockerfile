@@ -13,7 +13,7 @@
 #   docker build --secret id=NPM_TOKEN,env=NPM_TOKEN .
 # ============================================================
 
-ARG NODE_VERSION=24
+ARG NODE_VERSION=25
 ARG PNPM_VERSION=10
 
 # ────────────────────────────────────────────────────────────
