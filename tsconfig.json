@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
     "moduleResolution": "bundler",
-    "target": "ES2022",
-    "module": "ES2022",
-    "lib": ["ES2022", "DOM"],
+    "target": "es2025",
+    "module": "es2022",
+    "lib": ["ES2024", "DOM"],
     "sourceMap": true,
-    "outDir": "dist",
     "declaration": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
