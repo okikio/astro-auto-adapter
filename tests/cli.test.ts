@@ -46,7 +46,7 @@ async function makeTmpDir(): Promise<string> {
 // ============================================================
 
 describe("ADAPTERS constant", () => {
-  test("contains all six built-in adapters", () => {
+  test("contains all built-in adapters", () => {
     const values = ADAPTERS.map((a) => a.value);
     expect(values).toContain("node");
     expect(values).toContain("vercel");
@@ -64,6 +64,12 @@ describe("ADAPTERS constant", () => {
       expect(adapter.hint).toBeTruthy();
       expect(Array.isArray(adapter.envVars)).toBe(true);
     }
+  });
+
+  test("marks SST as static-only on Astro 6 for now", () => {
+    const sst = ADAPTERS.find((adapter) => adapter.value === "sst");
+    expect(sst?.compatibilityNote).toContain("Astro 6");
+    expect(sst?.compatibilityNote).toContain("static");
   });
 
   test("adapter packages match known npm packages", () => {
@@ -414,7 +420,7 @@ describe("getInstalledAdapters", () => {
     expect(result.size).toBe(0);
   });
 
-  test("detects all six adapters when all installed", async () => {
+  test("detects all built-in adapters when all installed", async () => {
     await writeFile(
       join(tmpDir, "package.json"),
       JSON.stringify({

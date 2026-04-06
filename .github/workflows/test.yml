@@ -25,7 +25,8 @@ on:
       - 'src/**'
 
 jobs:
-  test:
+  unit:
+    name: Unit Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -40,7 +41,7 @@ jobs:
           deno-version: v2.x
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: latest
           run_install: false
@@ -54,5 +55,73 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Tests
-        run: pnpm test
+      - name: Run unit tests
+        run: pnpm test:unit
+
+  runtime:
+    name: Runtime Tests (${{ matrix.adapter }} / ${{ matrix.output_mode }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - adapter: aws-lambda
+            output_mode: server
+          - adapter: bun
+            output_mode: static
+          - adapter: bun
+            output_mode: server
+          - adapter: node
+            output_mode: static
+          - adapter: node
+            output_mode: server
+          - adapter: deno
+            output_mode: static
+          - adapter: deno
+            output_mode: server
+          - adapter: netlify
+            output_mode: static
+          - adapter: netlify
+            output_mode: server
+          - adapter: vercel
+            output_mode: static
+          - adapter: vercel
+            output_mode: server
+          - adapter: cloudflare
+            output_mode: static
+          - adapter: cloudflare
+            output_mode: server
+          - adapter: sst
+            output_mode: static
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Setup Deno environment
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: latest
+          run_install: false
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run runtime integration tests
+        env:
+          ASTRO_AUTO_ADAPTER_TEST_ADAPTERS: ${{ matrix.adapter }}
+          ASTRO_AUTO_ADAPTER_TEST_OUTPUT_MODES: ${{ matrix.output_mode }}
+        run: pnpm test:runtime

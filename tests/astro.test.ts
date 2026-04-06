@@ -2,29 +2,11 @@ import type { IAdapterOptions, AdapterFactory } from '../src/index.ts';
 import { adapter, output, createTypedAdapter, getAutoAdapterType, getEnv } from '../src/index.ts';
 
 import { test, expect, describe, beforeEach, afterEach, vi } from 'vitest';
-import { $ } from 'zx';
 import process from "node:process";
 
 // ====================================================================
 // TEST CONFIGURATION
 // ====================================================================
-
-/**
- * Built-in adapter modes for comprehensive testing.
- * Tests both static and server output modes for each adapter.
- */
-const builtInModes = Object.keys({
-  cloudflare: {},
-  deno: {},
-  netlify: {},
-  vercel: {},
-  node: {},
-  sst: {},
-} as IAdapterOptions)
-  .map(adapterType => [
-    [adapterType, "static"],
-    [adapterType, "server"]
-  ]).flat(1);
 
 /**
  * Custom adapter test configurations.
@@ -135,6 +117,18 @@ function withEnvVars(vars: Record<string, string>, fn: () => Promise<void> | voi
   };
 }
 
+function withGlobalValue(key: string, value: unknown, fn: () => Promise<void> | void) {
+  return async () => {
+    vi.stubGlobal(key, value);
+
+    try {
+      await fn();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  };
+}
+
 // ====================================================================
 // UNIT TESTS
 // ====================================================================
@@ -151,6 +145,7 @@ describe('astro-auto-adapter', () => {
     // Clean up after each test
     delete process.env.ASTRO_ADAPTER_MODE;
     delete process.env.ASTRO_OUTPUT_MODE;
+    vi.unstubAllGlobals();
   });
 
   // ====================================================================
@@ -306,49 +301,6 @@ describe('astro-auto-adapter', () => {
       expect(capturedOptions[0].healthCheckPath).toBe('/status');
     });
   });
-});
-
-// ====================================================================
-// INTEGRATION TESTS (ASTRO BUILD)
-// ====================================================================
-
-describe('Astro Build Integration', () => {
-
-  test.for(builtInModes)(
-    'should build successfully with %s adapter in %s mode',
-    {
-      timeout: 30_000, // Increased timeout for build processes
-    },
-    async ([adapterType, outputMode]) => {
-      await withEnvVars(
-        {
-          ASTRO_ADAPTER_MODE: adapterType,
-          ASTRO_OUTPUT_MODE: outputMode
-        },
-        async () => {
-          console.log(`\n🔧 Testing: ${adapterType} adapter with ${outputMode} output`);
-
-          try {
-            const result = await $`astro build`;
-
-            console.log(`✅ Build successful for ${adapterType} (${outputMode})`);
-            console.log('Build output:', result.stdout.slice(-200)); // Last 200 chars
-
-            expect(result.exitCode).toBe(0);
-          } catch (error: any) {
-            console.error(`❌ Build failed for ${adapterType} (${outputMode})`);
-            console.error('Error message:', error.message);
-            console.error('stdout:', error.stdout?.slice(-500)); // Last 500 chars
-            console.error('stderr:', error.stderr?.slice(-500));
-
-            throw new Error(
-              `Build failed for ${adapterType} adapter with ${outputMode} output: ${error.message}`
-            );
-          }
-        }
-      )();
-    }
-  );
 });
 
 // ====================================================================
