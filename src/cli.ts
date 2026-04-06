@@ -27,6 +27,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { styleText } from "node:util";
 import {
   intro,
   outro,
@@ -38,7 +39,17 @@ import {
   note,
   log,
 } from "@clack/prompts";
-import pc from "picocolors";
+
+const styles = {
+  banner: (value: string) => styleText(["bgCyan", "black"], value),
+  bold: (value: string) => styleText("bold", value),
+  cyan: (value: string) => styleText("cyan", value),
+  dim: (value: string) => styleText("dim", value),
+  green: (value: string) => styleText("green", value),
+  red: (value: string) => styleText("red", value),
+  underline: (value: string) => styleText("underline", value),
+  yellow: (value: string) => styleText("yellow", value),
+} as const;
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -336,41 +347,41 @@ export function runCommand(cmd: string, silent = false): boolean {
  */
 function helpText(): string {
   return `
-${pc.bold("astro-auto-adapter")} – manage Astro adapter installations
+${styles.bold("astro-auto-adapter")} – manage Astro adapter installations
 
-${pc.bold("Usage:")}
+${styles.bold("Usage:")}
   astro-auto-adapter [command] [options]
 
-${pc.bold("Commands:")}
-  ${pc.cyan("init")}      Interactive setup wizard – choose platforms & install adapters
-  ${pc.cyan("add")}       Add one or more adapter packages interactively
-  ${pc.cyan("remove")}    Remove adapter packages interactively
-  ${pc.cyan("list")}      Show available adapters and which are installed
+${styles.bold("Commands:")}
+  ${styles.cyan("init")}      Interactive setup wizard – choose platforms & install adapters
+  ${styles.cyan("add")}       Add one or more adapter packages interactively
+  ${styles.cyan("remove")}    Remove adapter packages interactively
+  ${styles.cyan("list")}      Show available adapters and which are installed
 
-${pc.bold("Options:")}
-  ${pc.cyan("-h, --help")}       Show this help message and exit
-  ${pc.cyan("-v, --version")}    Print the current version and exit
+${styles.bold("Options:")}
+  ${styles.cyan("-h, --help")}       Show this help message and exit
+  ${styles.cyan("-v, --version")}    Print the current version and exit
 
-${pc.bold("Examples:")}
-  ${pc.dim("# Run the first-time setup wizard")}
+${styles.bold("Examples:")}
+  ${styles.dim("# Run the first-time setup wizard")}
   $ astro-auto-adapter init
 
-  ${pc.dim("# Add the Vercel adapter")}
+  ${styles.dim("# Add the Vercel adapter")}
   $ astro-auto-adapter add vercel
 
-  ${pc.dim("# Remove the Netlify adapter")}
+  ${styles.dim("# Remove the Netlify adapter")}
   $ astro-auto-adapter remove netlify
 
-  ${pc.dim("# List all adapters")}
+  ${styles.dim("# List all adapters")}
   $ astro-auto-adapter list
 
-${pc.bold("Environment variables:")}
-  ${pc.cyan("ASTRO_ADAPTER_MODE")}    Adapter to use at build / runtime
-  ${pc.cyan("ASTRO_OUTPUT_MODE")}     Output mode: "static" | "server"
-  ${pc.cyan("PACKAGE_MANAGER")}       Override detected package manager (npm, pnpm, yarn, bun, vlt, deno)
+${styles.bold("Environment variables:")}
+  ${styles.cyan("ASTRO_ADAPTER_MODE")}    Adapter to use at build / runtime
+  ${styles.cyan("ASTRO_OUTPUT_MODE")}     Output mode: "static" | "server"
+  ${styles.cyan("PACKAGE_MANAGER")}       Override detected package manager (npm, pnpm, yarn, bun, vlt, deno)
 
-${pc.bold("Learn more:")}
-  ${pc.underline("https://github.com/okikio/astro-auto-adapter")}
+${styles.bold("Learn more:")}
+  ${styles.underline("https://github.com/okikio/astro-auto-adapter")}
 `.trimStart();
 }
 
@@ -410,9 +421,9 @@ export async function listAdapters(): Promise<void> {
 
   const lines = ADAPTERS.map((a) => {
     const status = installed.has(a.value)
-      ? pc.green("✓ installed")
-      : pc.dim("  not installed");
-    return `  ${pc.bold(a.label.padEnd(14))}  ${a.pkg.padEnd(26)}  ${status}`;
+      ? styles.green("✓ installed")
+      : styles.dim("  not installed");
+    return `  ${styles.bold(a.label.padEnd(14))}  ${a.pkg.padEnd(26)}  ${status}`;
   });
 
   note(
@@ -451,24 +462,24 @@ export async function runInit(): Promise<void> {
     return;
   }
 
-  intro(pc.bgCyan(pc.black(" astro-auto-adapter ")));
+  intro(styles.banner(" astro-auto-adapter "));
 
   log.info(
     `Welcome! This wizard will help you pick the deployment platforms\n` +
     `your Astro project should support and install the required adapters.\n` +
     `\n` +
-    `${pc.dim("Tip: You can always add or remove adapters later with")} ${pc.cyan("astro-auto-adapter add/remove")}`
+    `${styles.dim("Tip: You can always add or remove adapters later with")} ${styles.cyan("astro-auto-adapter add/remove")}`
   );
 
   // Check for existing installations
   const installed = await getInstalledAdapters();
   if (installed.size > 0) {
     const installedNames = ADAPTERS.filter((a) => installed.has(a.value))
-      .map((a) => pc.cyan(a.label))
+      .map((a) => styles.cyan(a.label))
       .join(", ");
     log.warn(
       `You already have the following adapters installed: ${installedNames}\n` +
-      `They will ${pc.bold("not")} be reinstalled unless you select them again.`
+      `They will ${styles.bold("not")} be reinstalled unless you select them again.`
     );
   }
 
@@ -494,9 +505,9 @@ export async function runInit(): Promise<void> {
 
   if (toInstall.length === 0) {
     outro(
-      pc.green(
+      styles.green(
         "Nothing new to install – your adapters are already set up! 🎉\n\n" +
-        `Remember to configure your ${pc.cyan("astro.config.ts")} to use astro-auto-adapter.`
+        `Remember to configure your ${styles.cyan("astro.config.ts")} to use astro-auto-adapter.`
       )
     );
     return;
@@ -510,7 +521,7 @@ export async function runInit(): Promise<void> {
 
   // Confirm before installing
   const ok = await confirm({
-    message: `Install ${pc.cyan(packages.join(", "))} using ${pc.bold(pm)}?\n  ${pc.dim(installCmd)}`,
+    message: `Install ${styles.cyan(packages.join(", "))} using ${styles.bold(pm)}?\n  ${styles.dim(installCmd)}`,
     initialValue: true,
   });
 
@@ -518,10 +529,10 @@ export async function runInit(): Promise<void> {
 
   if (!ok) {
     note(
-      `Run the following command manually when you're ready:\n\n  ${pc.cyan(installCmd)}`,
+      `Run the following command manually when you're ready:\n\n  ${styles.cyan(installCmd)}`,
       "Skipped install"
     );
-    outro(pc.yellow("Setup skipped. Run the command above to complete setup."));
+    outro(styles.yellow("Setup skipped. Run the command above to complete setup."));
     return;
   }
 
@@ -532,9 +543,9 @@ export async function runInit(): Promise<void> {
   const success = runCommand(installCmd, true);
 
   if (success) {
-    s.stop(pc.green(`Installed ${packages.join(", ")} successfully!`));
+    s.stop(styles.green(`Installed ${packages.join(", ")} successfully!`));
   } else {
-    s.error(pc.red(`Installation failed. Try running manually:\n  ${installCmd}`));
+    s.error(styles.red(`Installation failed. Try running manually:\n  ${installCmd}`));
     process.exitCode = 1;
     return;
   }
@@ -543,26 +554,26 @@ export async function runInit(): Promise<void> {
   const adapterModes = (selected as AdapterValue[]).map((v) => v).join(" | ");
   note(
     [
-      `Add astro-auto-adapter to your ${pc.cyan("astro.config.ts")}:`,
+      `Add astro-auto-adapter to your ${styles.cyan("astro.config.ts")}:`,
       ``,
-      pc.dim(`  import { adapter, output } from "astro-auto-adapter";`),
-      pc.dim(`  `),
-      pc.dim(`  export default defineConfig({`),
-      pc.dim(`    output: output(),`),
-      pc.dim(`    adapter: await adapter(),`),
-      pc.dim(`  });`),
+      styles.dim(`  import { adapter, output } from "astro-auto-adapter";`),
+      styles.dim(`  `),
+      styles.dim(`  export default defineConfig({`),
+      styles.dim(`    output: output(),`),
+      styles.dim(`    adapter: await adapter(),`),
+      styles.dim(`  });`),
       ``,
-      `Set the ${pc.cyan("ASTRO_ADAPTER_MODE")} environment variable at build / runtime:`,
+      `Set the ${styles.cyan("ASTRO_ADAPTER_MODE")} environment variable at build / runtime:`,
       ``,
-      pc.dim(`  ASTRO_ADAPTER_MODE=${pc.bold(adapterModes)}`),
+      styles.dim(`  ASTRO_ADAPTER_MODE=${styles.bold(adapterModes)}`),
       ``,
-      `${pc.dim("Or let astro-auto-adapter auto-detect the platform from environment variables.")}`,
+      `${styles.dim("Or let astro-auto-adapter auto-detect the platform from environment variables.")}`,
     ].join("\n"),
     "Next steps"
   );
 
   outro(
-    pc.green("All done! 🚀 Your adapters are ready to use.")
+    styles.green("All done! 🚀 Your adapters are ready to use.")
   );
 }
 
@@ -580,13 +591,13 @@ export async function runInit(): Promise<void> {
  * @returns A promise that resolves when the adapters have been installed.
  */
 export async function runAdd(adapterArgs: string[]): Promise<void> {
-  intro(pc.bgCyan(pc.black(" astro-auto-adapter add ")));
+  intro(styles.banner(" astro-auto-adapter add "));
 
   const installed = await getInstalledAdapters();
   const available = ADAPTERS.filter((a) => !installed.has(a.value));
 
   if (available.length === 0) {
-    outro(pc.green("All available adapters are already installed! 🎉"));
+    outro(styles.green("All available adapters are already installed! 🎉"));
     return;
   }
 
@@ -599,8 +610,8 @@ export async function runAdd(adapterArgs: string[]): Promise<void> {
     );
     if (invalid.length > 0) {
       log.error(
-        `Unknown adapter(s): ${pc.red(invalid.join(", "))}\n` +
-        `Valid adapters: ${ADAPTERS.map((a) => pc.cyan(a.value)).join(", ")}`
+        `Unknown adapter(s): ${styles.red(invalid.join(", "))}\n` +
+        `Valid adapters: ${ADAPTERS.map((a) => styles.cyan(a.value)).join(", ")}`
       );
       process.exit(2);
     }
@@ -632,10 +643,10 @@ export async function runAdd(adapterArgs: string[]): Promise<void> {
   const success = runCommand(installCmd, true);
 
   if (success) {
-    s.stop(pc.green(`Added ${packages.join(", ")} successfully!`));
-    outro(pc.green("Done! 🎉"));
+    s.stop(styles.green(`Added ${packages.join(", ")} successfully!`));
+    outro(styles.green("Done! 🎉"));
   } else {
-    s.error(pc.red(`Installation failed. Try running manually:\n  ${installCmd}`));
+    s.error(styles.red(`Installation failed. Try running manually:\n  ${installCmd}`));
     process.exitCode = 1;
   }
 }
@@ -654,12 +665,12 @@ export async function runAdd(adapterArgs: string[]): Promise<void> {
  * @returns A promise that resolves when the adapters have been removed.
  */
 export async function runRemove(adapterArgs: string[]): Promise<void> {
-  intro(pc.bgCyan(pc.black(" astro-auto-adapter remove ")));
+  intro(styles.banner(" astro-auto-adapter remove "));
 
   const installed = await getInstalledAdapters();
 
   if (installed.size === 0) {
-    outro(pc.yellow("No astro-auto-adapter managed adapters are installed."));
+    outro(styles.yellow("No astro-auto-adapter managed adapters are installed."));
     return;
   }
 
@@ -671,8 +682,8 @@ export async function runRemove(adapterArgs: string[]): Promise<void> {
     );
     if (invalid.length > 0) {
       log.error(
-        `Unknown adapter(s): ${pc.red(invalid.join(", "))}\n` +
-        `Valid adapters: ${ADAPTERS.map((a) => pc.cyan(a.value)).join(", ")}`
+        `Unknown adapter(s): ${styles.red(invalid.join(", "))}\n` +
+        `Valid adapters: ${ADAPTERS.map((a) => styles.cyan(a.value)).join(", ")}`
       );
       process.exit(2);
     }
@@ -700,14 +711,14 @@ export async function runRemove(adapterArgs: string[]): Promise<void> {
 
   // Confirm destructive action
   const ok = await confirm({
-    message: `Remove ${pc.red(packages.join(", "))}?\n  ${pc.dim(removeCmd)}`,
+    message: `Remove ${styles.red(packages.join(", "))}?\n  ${styles.dim(removeCmd)}`,
     initialValue: false,
   });
 
   exitIfCancelled(ok);
 
   if (!ok) {
-    outro(pc.yellow("Nothing was removed."));
+    outro(styles.yellow("Nothing was removed."));
     return;
   }
 
@@ -717,10 +728,10 @@ export async function runRemove(adapterArgs: string[]): Promise<void> {
   const success = runCommand(removeCmd, true);
 
   if (success) {
-    s.stop(pc.green(`Removed ${packages.join(", ")} successfully.`));
-    outro(pc.green("Done."));
+    s.stop(styles.green(`Removed ${packages.join(", ")} successfully.`));
+    outro(styles.green("Done."));
   } else {
-    s.error(pc.red(`Removal failed. Try running manually:\n  ${removeCmd}`));
+    s.error(styles.red(`Removal failed. Try running manually:\n  ${removeCmd}`));
     process.exitCode = 1;
   }
 }
@@ -774,8 +785,8 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
 
     default:
       process.stderr.write(
-        `${pc.red("error")} Unknown command: ${pc.bold(command)}\n\n` +
-        `Run ${pc.cyan("astro-auto-adapter --help")} for usage information.\n`
+        `${styles.red("error")} Unknown command: ${styles.bold(command)}\n\n` +
+        `Run ${styles.cyan("astro-auto-adapter --help")} for usage information.\n`
       );
       process.exit(2);
   }
@@ -796,7 +807,7 @@ const isMain =
 if (isMain) {
   main().catch((err: unknown) => {
     const message = err instanceof Error ? err.message : String(err);
-    process.stderr.write(`${pc.red("error")} ${message}\n`);
+    process.stderr.write(`${styles.red("error")} ${message}\n`);
     process.exit(1);
   });
 }

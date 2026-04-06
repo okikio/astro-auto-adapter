@@ -47,11 +47,12 @@
     "start": "astro dev",
     "preview": "astro preview",
     "build": "tsdown",
-    "test": "vitest run",
+    "test": "pnpm test:unit && pnpm test:runtime",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:unit": "vitest run tests/unit",
-    "test:integration": "vitest run tests/integration",
+    "test:unit": "vitest run tests/astro.test.ts tests/cli.test.ts tests/custom-adapters.test.ts",
+    "test:integration": "pnpm test:runtime",
+    "test:runtime": "vitest run tests/runtime.test.ts",
     "test:custom-adapters": "vitest run tests/custom-adapters",
     "pre-release": "pnpm test && pnpm build",
     "semantic-release": "semantic-release"
@@ -97,11 +98,6 @@
     },
     "cacheDir": ".changelog"
   },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/okikio/astro-auto-adapter.git"
@@ -133,8 +129,6 @@
     "@astrojs/netlify": "^7.0.6",
     "@astrojs/node": "^10.0.4",
     "@astrojs/vercel": "^10.0.4",
-    "@commitlint/cli": "^20.5.0",
-    "@commitlint/config-conventional": "^20.5.0",
     "@deno/astro-adapter": "^0.3.2",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
@@ -146,7 +140,7 @@
     "tsdown": "0.21.7",
     "typescript": "^6.0.2",
     "vitest": "^4.1.2",
-    "zx": "^8.8.5"
+    "wrangler": "^4.80.0"
   },
   "peerDependencies": {
     "@astrojs/cloudflare": ">=12",
@@ -181,7 +175,6 @@
     "astro-auto-adapter": "./dist/cli.mjs"
   },
   "dependencies": {
-    "@clack/prompts": "^1.2.0",
-    "picocolors": "^1.1.1"
+    "@clack/prompts": "^1.2.0"
   }
 }
