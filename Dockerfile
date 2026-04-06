@@ -13,7 +13,7 @@
 #   docker build --secret id=NPM_TOKEN,env=NPM_TOKEN .
 # ============================================================
 
-ARG NODE_VERSION=25
+ARG NODE_VERSION=22
 ARG PNPM_VERSION=10
 
 # ────────────────────────────────────────────────────────────
@@ -23,8 +23,8 @@ FROM node:${NODE_VERSION}-alpine AS deps
 
 WORKDIR /app
 
-# Enable corepack and activate pnpm
-RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
+# Install pnpm directly to avoid Corepack issues in newer Node container images.
+RUN npm install --global pnpm@${PNPM_VERSION}
 
 # Copy only the files needed to resolve the dependency graph
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -42,7 +42,7 @@ FROM node:${NODE_VERSION}-alpine AS lib-builder
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
+RUN npm install --global pnpm@${PNPM_VERSION}
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -57,7 +57,7 @@ FROM node:${NODE_VERSION}-alpine AS app-builder
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
+RUN npm install --global pnpm@${PNPM_VERSION}
 
 COPY --from=lib-builder /app/node_modules ./node_modules
 COPY --from=lib-builder /app/dist ./dist

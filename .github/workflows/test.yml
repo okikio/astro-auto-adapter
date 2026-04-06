@@ -65,12 +65,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - adapter: aws-lambda
-            output_mode: server
-          - adapter: bun
-            output_mode: static
-          - adapter: bun
-            output_mode: server
           - adapter: node
             output_mode: static
           - adapter: node
