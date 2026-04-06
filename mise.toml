@@ -1,4 +1,5 @@
 [tools]
+bun = "latest"
 deno = "latest"
 node = "22"
 pnpm = "latest"
