@@ -15,6 +15,9 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  NPM_CLI_VERSION: 11.5.1
+
 jobs:
   release:
     name: Release
@@ -51,17 +54,14 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-          # registry-url is required to configure .npmrc for npm Trusted
-          # Publishers (OIDC). Do NOT set NODE_AUTH_TOKEN — npm will obtain
-          # a short-lived token from GitHub's OIDC provider automatically.
+          # Keep release validation on the package's main Node baseline.
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Upgrade npm for trusted publishing
-        # npm Trusted Publishers requires npm 11.5.1+.
+      - name: Verify pinned npm CLI
+        # Use a pinned npm CLI via pnpm instead of mutating the runner's global npm.
         run: |
-          npm install --global npm@^11.5.1
           node --version
-          npm --version
+          pnpm dlx npm@${NPM_CLI_VERSION} --version
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -95,12 +95,31 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Setup Node.js for npm trusted publishing
+        if: steps.release.outputs.new_release == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+          # registry-url is required to configure .npmrc for npm Trusted
+          # Publishers (OIDC). Keep this on the publish path so the release
+          # automation can use a newer Node runtime without changing the
+          # package's main validation baseline.
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Verify npm trusted publishing runtime
+        if: steps.release.outputs.new_release == 'true'
+        run: |
+          node --version
+          pnpm dlx npm@${NPM_CLI_VERSION} --version
+
       - name: Determine whether npm publish is needed
         id: publish-check
+        if: steps.release.outputs.new_release == 'true'
         run: |
           PACKAGE_NAME=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; const pkg = JSON.parse(readFileSync('./package.json', 'utf8')); console.log(pkg.name);")
           LOCAL_VERSION=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; const pkg = JSON.parse(readFileSync('./package.json', 'utf8')); console.log(pkg.version);")
-          REMOTE_VERSION=$(npm view "$PACKAGE_NAME" version --silent 2>/dev/null || echo "")
+          REMOTE_VERSION=$(pnpm dlx npm@${NPM_CLI_VERSION} view "$PACKAGE_NAME" version --silent 2>/dev/null || echo "")
 
           echo "package_name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
           echo "local_version=$LOCAL_VERSION" >> "$GITHUB_OUTPUT"
@@ -118,9 +137,9 @@ jobs:
       - name: Publish to npm (OIDC Trusted Publishers)
         # Publish whenever the checked-out package version differs from npm.
         # This keeps reruns recoverable if semantic-release succeeded but npm publish failed.
-        if: steps.publish-check.outputs.publish_needed == 'true'
+        if: steps.release.outputs.new_release == 'true' && steps.publish-check.outputs.publish_needed == 'true'
         # Uses npm Trusted Publishers (OIDC) — no NPM_TOKEN secret is required.
         # npm automatically obtains a short-lived access token from GitHub's
         # OIDC provider, verified against the Trusted Publisher configuration
         # on npmjs.com. provenance is enabled in publishConfig (package.json).
-        run: npm publish
+        run: pnpm dlx npm@${NPM_CLI_VERSION} publish
