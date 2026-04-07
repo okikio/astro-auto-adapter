@@ -1,3 +1,11 @@
+## [2.5.5](https://github.com/okikio/astro-auto-adapter/compare/v2.5.4...v2.5.5) (2026-04-07)
+
+
+### Bug Fixes
+
+* revert Node.js version to 22 in Dockerfile and update npm CLI usage in release workflow ([1619419](https://github.com/okikio/astro-auto-adapter/commit/16194196a0515243b61c4fd6e99e6d2d3d3c78fd))
+* update Node.js version to 25 and pnpm version to 10.33.0 in workflows and Dockerfile ([c2c51fa](https://github.com/okikio/astro-auto-adapter/commit/c2c51fa2c9c654d7d7aa0ecb39461da45f7afdd1))
+
 ## [2.5.4](https://github.com/okikio/astro-auto-adapter/compare/v2.5.3...v2.5.4) (2026-04-06)
 
 
