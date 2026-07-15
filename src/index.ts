@@ -437,6 +437,10 @@ export async function wrapImport<T>(packageName: string, promise: T): Promise<T>
   try {
     return await promise;
   } catch (error) {
+		if (!isMissingPackageError(error, packageName)) {
+			throw error;
+    }
+    
     throw new Error(
       `Package "${packageName}" is not installed. Please install it with your package manager, e.g.:\n` +
       `  npm install ${packageName}\n` +
@@ -448,6 +452,25 @@ export async function wrapImport<T>(packageName: string, promise: T): Promise<T>
       { cause: error }
     );
   }
+}
+
+/**
+ * Determines whether an import failed because the requested package could not
+ * be resolved, rather than because the package threw while being evaluated.
+ */
+export function isMissingPackageError(error: unknown, packageName: string): boolean {
+	if (!(error instanceof Error)) {
+		return false;
+	}
+
+	const code = "code" in error && typeof error.code === "string"
+		? error.code
+		: undefined;
+
+	return (
+		code === "ERR_MODULE_NOT_FOUND" ||
+		code === "MODULE_NOT_FOUND"
+	) && error.message.includes(packageName);
 }
 
 /**
