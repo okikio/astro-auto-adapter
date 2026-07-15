@@ -137,3 +137,4 @@ pnpm-debug.log*
 package-lock.json
 
 .wrangler
+.vscode
